@@ -1,0 +1,420 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# finarm - Financial Armageddon - version 1.0
+# Keeps track of the value of a currency and precious metals portfolio using prices retrieved from the net.
+# Just enter the amount of assets you own below.
+# Look at the options below for further customizations.
+
+# Developed by Andrea Chiavazza
+# Licensed under GPL 3.0
+# If you find this program useful, you can donate to the
+# bitcoin address 12f1khXXGp6vW6NizjRdfTgZDGWJdrna8i
+
+#--------------------- USER EDITABLE VARIABLES -------------------------------
+
+# Quantities of currencies in the portfolio.
+# The metals defined by ISO 4217 are:
+# XAU (gold), XAG (silver), XPD (palladium), XPT (platinum)
+# XBT (bitcoin) is being evaluated for inclusion in the ISO 4217 standard.
+# For all currency symbols see: http://en.wikipedia.org/wiki/ISO_4217
+# Having currencies with a quantity of 0 can be useful to have their price displayed even
+# when they are not part of the portfolio.
+PORTFOLIO = {
+'XAG':    '12',
+'XAU':    '0.1',
+'XBT':    '3',
+'EUR': '1500',
+}
+
+# Weight unit for the metals quantities in the portfolio.
+# When it is different from the unit used by the exchange a WEIGHT column will be created.
+# Allowed values are: 'mg' 'g' 'kg' 't' 'ozt'.
+PORTFOLIO_WEIGHT_UNIT = 'kg'
+
+# Which currencies to use for the displayed prices.
+PRICE_CURS = ('USD', 'EUR', 'GBP', )
+
+# Which currencies to use to compute the total value of the portfolio.
+TOTAL_CURS = ('USD', 'EUR', 'GBP', )
+
+# Whether to display the currencies from highest to lowest of their value in the portfolio.
+DISPLAY_HIGHEST_TO_LOWEST = True
+
+# How many fractional digits to use for all displayed values.
+FRACT_DIGITS = 2
+
+# Separator used to separate the fractional part.
+FRACT_SEPARATOR = "."
+
+# Separator used to group the thousands. Use "" to have no thousand separators.
+THOUSAND_SEPARATOR = "'"
+
+# Spaces between the table columns.
+COLUMNS_GAP = 2
+
+# Names to use for the columns labels. A label can be split in multiple lines by using '\n'.
+# Adding '.upper()' to a label name makes it upper case.
+SYMBOL_LABEL = 'SYM'
+QUANTITY_LABEL = 'QTY'
+WEIGHT_LABEL = 'WGT\n' + PORTFOLIO_WEIGHT_UNIT.upper()
+SHARE_LABEL = 'VALUE\n%'
+
+# The price label given the currency name.
+def makePriceLabel(cur): return 'PRICE\n' + cur
+
+# The total label given the currency name.
+def makeTotalLabel(cur): return 'VALUE\n' + cur
+
+# This will generate price labels for all currencies such as PRICE(USD), PRICE(GBP), PRICE(EUR)
+PRICE_LABELS = tuple(map(makePriceLabel, PRICE_CURS))
+
+# This will generate price labels for all currencies such as VALUE(USD), VALUE(GBP), VALUE(EUR)
+TOTAL_LABELS = tuple(map(makeTotalLabel, TOTAL_CURS))
+
+# Which columns to display and in what order.
+# Columns with no values will not be shown.
+LABELS_ORDER = (SYMBOL_LABEL,) + PRICE_LABELS + (QUANTITY_LABEL, WEIGHT_LABEL) + (SHARE_LABEL,) + TOTAL_LABELS
+
+# Which columns should have a sum of all values displayed at the bottom.
+COLUMNS_WITH_TOTAL = (WEIGHT_LABEL, SHARE_LABEL) + TOTAL_LABELS
+
+# Ratios to be displayed. A commonly followed ratio is gold/silver.
+RATIOS = (('XAU', 'XAG'),
+          ('XBT', 'XAU'),
+          ('EUR', 'USD'),
+          ('GBP', 'EUR'),
+          ('GBP', 'USD'),
+         )
+
+#--------------------- END OF USER EDITABLE VARIABLES ------------------------
+
+# Symbols that represent metals.
+METALS = frozenset({'XAG', 'XAU', 'XPD', 'XPT'})
+
+# Weight unit for the prices given by the echanges.
+PRICE_WEIGHT_UNIT = 'ozt'
+
+# Character to be used for the lines that separate the totals.
+LINE_CHAR = '\u2012' # this is a horizontal line that takes the full width.
+
+# This constant is created to avoid running the same code many times.
+TRANS = str.maketrans(dict((() if FRACT_SEPARATOR    == '.' else (('.', FRACT_SEPARATOR),)) +
+                           (() if THOUSAND_SEPARATOR == ',' else ((',', THOUSAND_SEPARATOR),))))
+
+# Providers used to retrieve XBT price.
+# They are defined as url: (supportedCurrencies, jsonKeys, separator).
+# Any occurrence of '%%%' in the url will be replaced by XBT_CUR.
+# if sep is '' then only one symbol can be queried and %%% is replaced by the symbol
+# if sep is not '' then %%% is replaced by the symbols separated by sep and the last value of jsonKeys
+#                       must be a tuple with (symbolKey, valueKey) that is used for the array of dicts returned.
+# [{'Symbol': 'GBPUSD=X', 'Bid': '1.6167'}, {'Symbol': 'XAUUSD=X', 'Bid': '1335.6801'}]
+# Some providers can ban an IP address when too frequent requests are made. For bitstamp.net allows
+# a maximum of 600 request per 10 minutes.
+# Bitstamp conversion rate could also be used: https://www.bitstamp.net/api/eur_usd/
+# For bitstamp.net it can be 'bid' 'ask' 'last' 'high' 'low'.
+# For mtgox.com it can be 'buy' 'sell' 'last', and others.
+# For btcchina.com it can be 'buy' 'sell' 'last'
+PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
+                 ({'q': 'select Symbol,LastTradePriceOnly from yahoo.finance.quotes where symbol in ("%%%")',
+                   'env': 'store://datatables.org/alltableswithkeys',
+                   'format': 'json'},
+                  {'USD'},
+                  ('query', 'results', 'quote', ('Symbol', 'LastTradePriceOnly')), '","', '%1%%2%=X'),
+             'https://www.bitstamp.net/api/ticker/':
+                 ({},
+                  {'USD'},
+                  ('bid',), '', ''),
+             'https://btcchina.com/bc/ticker':
+                 ({},
+                  {'CNY'},
+                  ('ticker', 'buy'), '', ''),
+             'https://btc-e.com/api/2/btc_usd/ticker':
+                 ({},
+                  {'USD'},
+                  ('ticker', 'buy'), '', ''),
+             'https://campbx.com/api/xticker.php':
+                 ({},
+                  {'USD'},
+                  ('Best Bid',), '', ''),
+             'https://data.mtgox.com/api/2/BTC%%%/money/ticker':
+                 ({},
+                  {'USD', 'AUD', 'CAD', 'CHF', 'CNY', 'DKK', 'EUR', 'GBP', 'HKD',
+                   'NZD', 'PLN', 'RUB', 'SGD', 'THB', 'NOK', 'CZK'},
+                  ('data', 'buy', 'value'), '', '%2%')
+            }
+
+# Which exchange to use to provide the price for XBT.
+# Make sure that XBT_CUR is supported by the exchange.
+# Allowed values are 'bitstamp.net' (Europe)
+#                    'btcchina.com' (China)
+#                    'btc-e.com'    (Russia)
+#                    'campbx.com'   (USA)
+#                    'mtgox.com'    (Japan)
+# Note: part of the domain name can be omitted (eg. the .com) as long as there is no ambiguity.
+
+# Aliases for currency names that are retrieved from a certain provider.
+# The dict entries are: from-cur-alias: (provider, from-cur, to-cur)
+# An asterisc means "any" and can be used to set a default provider.
+CURS_MAP = {'XBT':    ('bitstamp.net',  'XBT', 'USD'),
+            'XBTM':   ('mtgox.com',     'XBT', 'USD'),
+            'XBTC':   ('btcchina.com',  'XBT', 'CNY'),
+            'XBTE':   ('btc-e.com',     'XBT', 'USD'),
+            'XBTA':   ('campbx.com',    'XBT', 'USD'),
+            'SILVER': ('yahooapis.com', 'XAG', 'USD'),
+            '*'   :   ('yahooapis.com',   '*', 'USD'),
+           }
+
+# Number of seconds to wait between failed requests.
+PAUSE_ON_ERROR = 1.0
+
+#-------------------------------------------------------------------------------
+
+import json, sys, itertools, time
+from decimal import Decimal
+from urllib.request import Request, urlopen
+from urllib.parse import urlparse, urlencode
+from functools import reduce
+from itertools import chain
+from multiprocessing import Pool
+from datetime import datetime, tzinfo
+
+####### General purpose functions
+
+# Returns the keys of a dictionary sorted by value, optionally in reverse order.
+def sortedKeys(d, rev = False):
+    return tuple(pair[0] for pair in sorted(d.items(),
+                                            key = lambda pair: pair[1],
+                                            reverse = rev))
+ 
+# Merges dictionaries.
+def mergeDicts(dicts):
+    return dict(chain.from_iterable(d.items() for d in dicts))
+
+# This avoids changing a dict in place. Works like Clojure assoc.
+# It is inefficient though as it relies on copying.
+def assoc(d, k, v):
+    return dict(tuple(d.items()) + ((k, v),))
+
+# Returns the amount of grams in the named unit.
+def toGram(unit):
+    table = {'mg' :       '0.001',
+             'g'  :       '1',
+             'kg' :    '1000',
+             't'  : '1000000',
+             'ozt':      '31.1034768'}
+    if unit not in table:
+        raise Exception('Invalid weight unit \'' + unit + '\'')
+    return Decimal(table[unit])
+
+# Group by
+def groupBy(f, coll):
+    return {kv[0]: tuple(kv[1])
+            for kv in itertools.groupby(sorted(coll, key=f), key=f)}
+    
+def convertWeight(val, fromName, toName):
+    fromNameLC = fromName.lower()
+    toNameLC = toName.lower()
+    return val if fromNameLC == toNameLC \
+           else val * toGram(fromNameLC) / toGram(toNameLC)
+
+def urlToDomain(url):
+    return '{uri.netloc}'.format(uri = urlparse(url))
+
+# The only function that exchanges data with the net.
+def retrieveData(url):
+    response = urlopen(Request(url,
+                               headers = {'User-Agent': 'curs'}))
+    return str(response.read(),
+               encoding = 'utf8')
+
+# Returns the url if it can be identified unambiguously by domain, otherwise returns None.
+def domainToProvider(domain):
+    urls = tuple(url for url in PROVIDERS if domain in url)
+    return urls[0] if len(urls) == 1 else None
+
+def providerForSymbol(symbol):
+    if symbol in CURS_MAP: return domainToProvider(CURS_MAP[symbol][0])
+    elif '*' in CURS_MAP: return domainToProvider(CURS_MAP['*'][0])
+    else: return None
+
+def symbolForAlias(alias):
+    if alias in CURS_MAP: return CURS_MAP[alias][1]
+    elif '*' in CURS_MAP: return alias
+    else: return None
+
+def curForSymbol(symbol):
+    if symbol in CURS_MAP: return CURS_MAP[symbol][2]
+    elif '*' in CURS_MAP: return CURS_MAP['*'][2]
+    else: return None
+
+
+def isMetal(symbol):
+    return symbol in METALS
+
+def getPortfolioQuantity(portfolio, symbol, toUnit):
+    val = Decimal(portfolio[symbol])
+    return convertWeight(val, PORTFOLIO_WEIGHT_UNIT, toUnit) if isMetal(symbolForAlias(symbol)) else val
+
+# Returns a dict of column : value for a given symbol
+def makeDataRow(symbol, symbolsToPrice, curToSymbolToTotal, portfolio, totalPriceCur, commonCur):
+    return dict(chain(((SYMBOL_LABEL, symbol),
+                       (QUANTITY_LABEL, getPortfolioQuantity(portfolio, symbol, PRICE_WEIGHT_UNIT))),
+                      ((makePriceLabel(cur), symbolsToPrice[symbol] / symbolsToPrice[cur])
+                       for cur in PRICE_CURS),
+                      ((makeTotalLabel(cur), curToSymbolToTotal[cur][symbol])
+                       for cur in TOTAL_CURS),
+                      (((WEIGHT_LABEL, getPortfolioQuantity(portfolio, symbol, PORTFOLIO_WEIGHT_UNIT)),)
+                       if isMetal(symbol) and PORTFOLIO_WEIGHT_UNIT != PRICE_WEIGHT_UNIT
+                       else ()),
+                      (((SHARE_LABEL, curToSymbolToTotal[commonCur][symbol] * 100 / totalPriceCur),)
+                       if totalPriceCur != 0
+                       else ())))
+
+def makeRatios(symbolsToPrice, ratios):
+    text = (COLUMNS_GAP * ' ').join((ratio[0] + '/' + ratio[1] + ' = ' +
+                                     formatVal(symbolsToPrice[ratio[0]] / symbolsToPrice[ratio[1]], 0))
+                                    for ratio in ratios)
+    return () if text == '' else ({'': text},)
+
+def getPricesFrom(provider, symbols, cur):
+    # Providers to retrieve symbols prices from.
+    # They are defined as url: (args, supportedCurrencies, jsonKeys, separator)
+    symbols = frozenset(symbols) - set((cur,))
+    data = PROVIDERS[provider]
+    separator = data[3]
+    pattern = data[4]
+    symbolsToProvIds = {symbol: pattern.replace('%1%', symbolForAlias(symbol))
+                                       .replace('%2%', cur)
+                        for symbol in symbols}
+    patterns = separator.join(symbolsToProvIds.values())
+    reqs = {kv[0]: kv[1].replace('%%%', patterns)
+            for kv in data[0].items()}
+    supportedCurrencies = data[1]
+    jsonKeys = data[2]
+    if cur not in supportedCurrencies:
+        raise Exception(provider + ' doesn\'t support ' + cur)
+    url = provider.replace('%%%', patterns) + ('' if reqs == {} else ('?' + urlencode(reqs)))
+    result = None
+    while result is None:
+        try:
+            data = json.loads(retrieveData(url)) # can throw exceptions
+            size = len(symbols)
+            if size < 1:
+                result = {}
+            elif size == 1:
+                price = reduce(lambda d, k: d[k],
+                               jsonKeys,
+                               data)
+                result = {next(iter(symbols)): Decimal(price)}
+            elif size > 1:
+                prices = reduce(lambda d, k: d[k], # can throw exceptions
+                                jsonKeys[:-1],
+                                data)
+                kv = jsonKeys[-1]
+                provIdsToCur = {price[kv[0]]: Decimal(price[kv[1]])
+                                for price in prices}
+                result = dict((symbol, provIdsToCur[symbolsToProvIds[symbol]])
+                              for symbol in symbols)
+        except:
+            result = None
+            print(' *', end='')
+            sys.stdout.flush()
+            time.sleep(PAUSE_ON_ERROR)
+            continue
+    print( ' ' + urlToDomain(provider), end = '')
+    sys.stdout.flush()
+    return assoc(result, cur, Decimal(1.0))
+
+# The dict entries are: fromCurAlias: (provider, fromCur, toCur)
+def getPrices(symbols):
+    # group all symbols by their provider by looking at PROVIDERS
+    providersToSymbols = groupBy(providerForSymbol, symbols)
+    # make one query for each provider
+    pool = Pool(processes = len(providersToSymbols))
+    results = tuple(pool.apply_async(getPricesFrom,
+                                     (providerAndSymbols[0],
+                                      providerAndSymbols[1],
+                                      curForSymbol(providerAndSymbols[1][0])))
+                    for providerAndSymbols in providersToSymbols.items())
+    pool.close()
+    pool.join()
+    merged = mergeDicts(res.get() for res in results)
+    # return all merged results
+    return {kv[0]: kv[1] * merged[curForSymbol(kv[0])]
+            for kv in merged.items()}
+
+def getData(portfolio):
+    symbolsNeeded = (frozenset(portfolio.keys()) | set(PRICE_CURS) | set(TOTAL_CURS)) | \
+                    reduce(lambda a, b: set(a) | set(b), RATIOS, set())
+    symbolsToPrice = getPrices(symbolsNeeded | {curForSymbol(x) for x in symbolsNeeded})
+    totalsCur = {symbol: getPortfolioQuantity(portfolio, symbol, PRICE_WEIGHT_UNIT) * symbolsToPrice[symbol]
+                 for symbol in portfolio}
+    commonCur = curForSymbol(tuple(symbolsNeeded)[0])
+    curToSymbolToTotal = {cur: {symbol: totalsCur[symbol] / symbolsToPrice[cur]
+                                for symbol in portfolio}
+                          for cur in TOTAL_CURS + (commonCur,)}
+    totalPriceCur = sum(curToSymbolToTotal[commonCur].values())
+    symbolsData = tuple(makeDataRow(symbol, symbolsToPrice, curToSymbolToTotal, portfolio, totalPriceCur, commonCur)
+                        for symbol in sortedKeys(totalsCur, DISPLAY_HIGHEST_TO_LOWEST))
+    totals = {label: sum(data.get(label, 0)
+                         for data in symbolsData)
+              for label in COLUMNS_WITH_TOTAL}
+    totalsLines = {label: LINE_CHAR * len(formatVal(totals[label], 0))
+                   for label in totals}
+    return makeRatios(symbolsToPrice, RATIOS) + symbolsData + (totalsLines,) + (totals,)
+
+# If l > 0 spaces will be added to the left to reach the length of l.
+def formatVal(val, l):
+    ls = str(l) if l > 0 else ''
+    if val == 0:
+        return formatVal('', l)
+    if isinstance(val, Decimal):
+        return ('{:' + ls + (',' if THOUSAND_SEPARATOR else '') + '.' + str(FRACT_DIGITS) + 'f}').format(val).translate(TRANS)
+    if isinstance(val, str):
+        return ('{:>' + ls + '}').format(val)
+    else:
+        raise Exception('Unsupported type for value \'' + str(val) + '\'')
+
+# Rows with all empty strings are skipped, but rows with no entries at all are printed as empty lines.
+def formatRow(d, nonEmptyCols, colSizes):
+    if len(d) == 0:
+        return '\n'
+    elif any(bool(val) for val in d.values()): 
+        return ''.join(formatVal(d[col] if col in d else '',
+                                 colSizes[col])
+                       for col in nonEmptyCols) + '\n'
+    else:
+        return '\n'
+
+def makeTextTable(dicts, nonEmptyCols):
+    colSizes = {col: max(len(formatVal(d.get(col, ''), 0))
+                         for d in dicts)
+                     + (COLUMNS_GAP if col != nonEmptyCols[0] else 0)
+                for col in nonEmptyCols}
+    return ''.join(d[''] + '\n'
+                   for d in dicts if '' in d) + \
+           '\n' + \
+           ''.join(formatRow(d, nonEmptyCols, colSizes)
+                   for d in dicts if '' not in d)
+
+def makeData(dicts, columns):
+    nonEmptyCols = tuple(col for col in columns
+                         if any(col in row and bool(row[col])
+                                for row in dicts))
+    lineSplitCols = dict((col, col.split('\n'))
+                         for col in nonEmptyCols)
+    titleRows = tuple({col: lineSplitCols[col][titleRowN]
+                       for col in lineSplitCols if len(lineSplitCols[col]) > titleRowN}
+                      for titleRowN in range(max(map(len,
+                                                     lineSplitCols.values()))))
+    return str(makeTextTable(titleRows + ({},) + dicts, nonEmptyCols))
+
+# Execution starting point
+print(datetime.now().replace(microsecond = 0).isoformat(' ') + ' - Prices from:',
+      end = '')
+
+sys.stdout.flush()
+
+print('\n' + makeData(getData(PORTFOLIO), LABELS_ORDER),
+      end = '')
