@@ -18,19 +18,20 @@
 # XAU (gold), XAG (silver), XPD (palladium), XPT (platinum)
 # XBT (bitcoin) is being evaluated for inclusion in the ISO 4217 standard.
 # For all currency symbols see: http://en.wikipedia.org/wiki/ISO_4217
+# Currency quantities must be defined by a number.
+# Metal quatities must be defined by a map of weight units to quatities.
 # Having currencies with a quantity of 0 can be useful to have their price displayed even
 # when they are not part of the portfolio.
 PORTFOLIO = {
-'XAG':    '12',
-'XAU':    '0.1',
+'XAG': {'kg': '12',   'ozt': '18'},
+'XAU': {'kg':  '0.1', 'ozt':  '2'},
 'XBT':    '3',
 'EUR': '1500',
 }
 
-# Weight unit for the metals quantities in the portfolio.
-# When it is different from the unit used by the exchange a WEIGHT column will be created.
+# Weight units for the metal quantities in the portfolio.
 # Allowed values are: 'mg' 'g' 'kg' 't' 'ozt'.
-PORTFOLIO_WEIGHT_UNIT = 'kg'
+WEIGHT_UNITS = ('kg', 'ozt', )
 
 # Which currencies to use for the displayed prices.
 PRICE_CURS = ('USD', 'EUR', 'GBP', )
@@ -54,10 +55,8 @@ THOUSAND_SEPARATOR = "'"
 COLUMNS_GAP = 2
 
 # Names to use for the columns labels. A label can be split in multiple lines by using '\n'.
-# Adding '.upper()' to a label name makes it upper case.
 SYMBOL_LABEL = 'SYM'
 QUANTITY_LABEL = 'QTY'
-WEIGHT_LABEL = 'WGT\n' + PORTFOLIO_WEIGHT_UNIT.upper()
 SHARE_LABEL = 'VALUE\n%'
 
 # The price label given the currency name.
@@ -66,18 +65,24 @@ def makePriceLabel(cur): return 'PRICE\n' + cur
 # The total label given the currency name.
 def makeTotalLabel(cur): return 'VALUE\n' + cur
 
+# The weight label given the unit name.
+def makeWeightLabel(unit): return 'WGT\n' + unit.upper()
+
 # This will generate price labels for all currencies such as PRICE(USD), PRICE(GBP), PRICE(EUR)
 PRICE_LABELS = tuple(map(makePriceLabel, PRICE_CURS))
 
 # This will generate price labels for all currencies such as VALUE(USD), VALUE(GBP), VALUE(EUR)
 TOTAL_LABELS = tuple(map(makeTotalLabel, TOTAL_CURS))
 
+# This will generate weight labels for all units.
+WEIGHT_LABELS = tuple(map(makeWeightLabel, WEIGHT_UNITS))
+
 # Which columns to display and in what order.
 # Columns with no values will not be shown.
-LABELS_ORDER = (SYMBOL_LABEL,) + PRICE_LABELS + (QUANTITY_LABEL, WEIGHT_LABEL) + (SHARE_LABEL,) + TOTAL_LABELS
+LABELS_ORDER = (SYMBOL_LABEL,) + PRICE_LABELS + (QUANTITY_LABEL,) + WEIGHT_LABELS + (SHARE_LABEL,) + TOTAL_LABELS
 
 # Which columns should have a sum of all values displayed at the bottom.
-COLUMNS_WITH_TOTAL = (WEIGHT_LABEL, SHARE_LABEL) + TOTAL_LABELS
+COLUMNS_WITH_TOTAL = WEIGHT_LABELS + (SHARE_LABEL,) + TOTAL_LABELS
 
 # Ratios to be displayed. A commonly followed ratio is gold/silver.
 RATIOS = (('XAU', 'XAG'),
@@ -253,8 +258,12 @@ def isMetal(symbol):
     return symbol in METALS
 
 def getPortfolioQuantity(portfolio, symbol, toUnit):
-    val = Decimal(portfolio[symbol])
-    return convertWeight(val, PORTFOLIO_WEIGHT_UNIT, toUnit) if isMetal(symbolForAlias(symbol)) else val
+    vals = portfolio[symbol]
+    if isMetal(symbolForAlias(symbol)):
+        return sum(convertWeight(Decimal(qty), unit, toUnit)
+                   for unit, qty in vals.items())
+    else:
+        return Decimal(vals)
 
 # Returns a dict of column : value for a given symbol
 def makeDataRow(symbol, symbolsToPrice, curToSymbolToTotal, portfolio, totalPriceCur, commonCur):
@@ -264,8 +273,9 @@ def makeDataRow(symbol, symbolsToPrice, curToSymbolToTotal, portfolio, totalPric
                        for cur in PRICE_CURS),
                       ((makeTotalLabel(cur), curToSymbolToTotal[cur][symbol])
                        for cur in TOTAL_CURS),
-                      (((WEIGHT_LABEL, getPortfolioQuantity(portfolio, symbol, PORTFOLIO_WEIGHT_UNIT)),)
-                       if isMetal(symbol) and PORTFOLIO_WEIGHT_UNIT != PRICE_WEIGHT_UNIT
+                      (((makeWeightLabel(unit), getPortfolioQuantity(portfolio, symbol, unit))
+                        for unit in WEIGHT_UNITS)
+                       if isMetal(symbol)
                        else ()),
                       (((SHARE_LABEL, curToSymbolToTotal[commonCur][symbol] * 100 / totalPriceCur),)
                        if totalPriceCur != 0
