@@ -23,8 +23,8 @@
 # Having currencies with a quantity of 0 can be useful to have their price displayed even
 # when they are not part of the portfolio.
 PORTFOLIO = {
-'XAG': {'kg': '12',   'ozt': '18'},
-'XAU': {'kg':  '0.1', 'ozt':  '2'},
+'XAG': {'kg': '12', 'ozt': '18'},
+'XAU': {'g': '100', 'ozt':  '2'},
 'XBT':    '3',
 'EUR': '1500',
 }
