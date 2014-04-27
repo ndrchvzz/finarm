@@ -31,7 +31,7 @@ PORTFOLIO = {
 
 # Weight units for the metal quantities in the portfolio.
 # Allowed values are: 'mg' 'g' 'kg' 't' 'ozt'.
-WEIGHT_UNITS = ('kg', 'ozt', )
+WEIGHT_UNITS = ('kg', )
 
 # Which currencies to use for the displayed prices.
 PRICE_CURS = ('USD', 'EUR', 'GBP', )
