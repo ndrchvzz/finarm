@@ -7,18 +7,18 @@ Simply edit the lines at the beginning of the script with the value of your asse
 The script produces some text with a breakdown of your portfolio. An example of the output produced:
 
 ```
-2014-04-27 09:21:22 - Prices from: www.bitstamp.net query.yahooapis.com
-XAU/XAG = 66.21  XBT/XAU = 0.35  EUR/USD = 1.38  GBP/EUR = 1.21  GBP/USD = 1.68
+2014-05-17 22:50:05 - Prices from: www.bitstamp.net query.yahooapis.com
+XAU/XAG = 67.012  XBT/XAU = 0.347  EUR/USD = 1.370  GBP/EUR = 1.228  GBP/USD = 1.682
 
-SYM     PRICE   PRICE   PRICE       QTY    WGT   VALUE      VALUE      VALUE      VALUE
-          USD     EUR     GBP               KG       %        USD        EUR        GBP
+SYM     PRICE   PRICE   PRICE        QTY     WGT  VALUE   VALUE   VALUE   VALUE
+          USD     EUR     GBP                 KG      %     USD     EUR     GBP
 
-XAG     19.68   14.23   11.72    403.81  12.56   43.70   7'948.98   5'745.97   4'730.97
-XAU  1'303.40  942.17  775.74      5.22   0.16   37.37   6'797.33   4'913.49   4'045.55
-EUR      1.38    1.00    0.82  1'500.00          11.41   2'075.10   1'500.00   1'235.03
-XBT    456.43  329.93  271.65      3.00           7.53   1'369.29     989.80     814.96
-                                         ‒‒‒‒‒  ‒‒‒‒‒‒  ‒‒‒‒‒‒‒‒‒  ‒‒‒‒‒‒‒‒‒  ‒‒‒‒‒‒‒‒‒
-                                         12.72  100.00  18'190.70  13'149.27  10'826.51
+XAG     19.29   14.09   11.47    403.809  12.560   43.2   7'790   5'688   4'633
+XAU  1'292.80  943.93  768.79      5.215   0.162   37.4   6'742   4'923   4'009
+EUR      1.37    1.00    0.81  1'500.000           11.4   2'054   1'500   1'222
+XBT    448.31  327.33  266.60      3.200            8.0   1'435   1'047     853
+                                          ‒‒‒‒‒‒  ‒‒‒‒‒  ‒‒‒‒‒‒  ‒‒‒‒‒‒  ‒‒‒‒‒‒
+                                          12.722  100.0  18'021  13'158  10'717
 ```
 
 Various options to change the format of the output can be set by editing a few variables at the beginning of the script.
