@@ -23,9 +23,9 @@
 # Having currencies with a quantity of 0 can be useful to have their price displayed even
 # when they are not part of the portfolio.
 PORTFOLIO = {
-'XAG': {'kg': '12', 'ozt': '18'},
 'XAU': {'g': '100', 'ozt':  '2'},
-'XBT':    '3',
+'XAG': {'kg': '12', 'ozt': '18'},
+'XBT':    '3.2',
 'EUR': '1500',
 }
 
@@ -43,7 +43,12 @@ TOTAL_CURS = ('USD', 'EUR', 'GBP', )
 DISPLAY_HIGHEST_TO_LOWEST = True
 
 # How many fractional digits to use for all displayed values.
-FRACT_DIGITS = 2
+RATIOS_FRACT_DIGITS = 3
+PRICES_FRACT_DIGITS = 2
+QTY_FRACT_DIGITS = 3
+WGT_FRACT_DIGITS = 3
+VALUE_SHARE_FRACT_DIGITS = 1
+VALUES_FRACT_DIGITS = 0
 
 # Separator used to separate the fractional part.
 FRACT_SEPARATOR = "."
@@ -253,7 +258,6 @@ def curForSymbol(symbol):
     elif '*' in CURS_MAP: return CURS_MAP['*'][2]
     else: return None
 
-
 def isMetal(symbol):
     return symbol in METALS
 
@@ -283,7 +287,9 @@ def makeDataRow(symbol, symbolsToPrice, curToSymbolToTotal, portfolio, totalPric
 
 def makeRatios(symbolsToPrice, ratios):
     text = (COLUMNS_GAP * ' ').join((ratio[0] + '/' + ratio[1] + ' = ' +
-                                     formatVal(symbolsToPrice[ratio[0]] / symbolsToPrice[ratio[1]], 0))
+                                     formatVal(symbolsToPrice[ratio[0]] / symbolsToPrice[ratio[1]],
+                                               RATIOS_FRACT_DIGITS,
+                                               0))
                                     for ratio in ratios)
     return () if text == '' else ({'': text},)
 
@@ -370,35 +376,54 @@ def getData(portfolio):
     totals = {label: sum(data.get(label, 0)
                          for data in symbolsData)
               for label in COLUMNS_WITH_TOTAL}
-    totalsLines = {label: LINE_CHAR * len(formatVal(totals[label], 0))
+    totalsLines = {label: LINE_CHAR * len(formatVal(totals[label],
+                                                    getFractDigits(label),
+                                                    0))
                    for label in totals}
     return makeRatios(symbolsToPrice, RATIOS) + symbolsData + (totalsLines,) + (totals,)
 
 # If l > 0 spaces will be added to the left to reach the length of l.
-def formatVal(val, l):
+def formatVal(val, fractDigits, l):
     ls = str(l) if l > 0 else ''
     if val == 0:
-        return formatVal('', l)
+        return formatVal('', fractDigits, l)
     if isinstance(val, Decimal):
-        return ('{:' + ls + (',' if THOUSAND_SEPARATOR else '') + '.' + str(FRACT_DIGITS) + 'f}').format(val).translate(TRANS)
+        return ('{:' + ls + (',' if THOUSAND_SEPARATOR else '') + '.' + str(fractDigits) + 'f}').format(val).translate(TRANS)
     if isinstance(val, str):
         return ('{:>' + ls + '}').format(val)
     else:
         raise Exception('Unsupported type for value \'' + str(val) + '\'')
+
+def getFractDigits(colName):
+    if colName in PRICE_LABELS:
+        return PRICES_FRACT_DIGITS
+    elif colName == QUANTITY_LABEL:
+        return QTY_FRACT_DIGITS
+    elif colName in WEIGHT_LABELS:
+        return WGT_FRACT_DIGITS
+    elif colName == SHARE_LABEL:
+        return VALUE_SHARE_FRACT_DIGITS
+    elif colName in TOTAL_LABELS:
+        return VALUES_FRACT_DIGITS
+    else:
+        return 0
 
 # Rows with all empty strings are skipped, but rows with no entries at all are printed as empty lines.
 def formatRow(d, nonEmptyCols, colSizes):
     if len(d) == 0:
         return '\n'
     elif any(bool(val) for val in d.values()): 
-        return ''.join(formatVal(d[col] if col in d else '',
+        return ''.join(formatVal(d.get(col, ''),
+                                 getFractDigits(col),
                                  colSizes[col])
                        for col in nonEmptyCols) + '\n'
     else:
         return '\n'
 
 def makeTextTable(dicts, nonEmptyCols):
-    colSizes = {col: max(len(formatVal(d.get(col, ''), 0))
+    colSizes = {col: max(len(formatVal(d.get(col, ''),
+                                       getFractDigits(col),
+                                       0))
                          for d in dicts)
                      + (COLUMNS_GAP if col != nonEmptyCols[0] else 0)
                 for col in nonEmptyCols}
