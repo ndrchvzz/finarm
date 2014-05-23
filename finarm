@@ -43,8 +43,8 @@ TOTAL_CURS = ('USD', 'EUR', 'GBP', )
 DISPLAY_HIGHEST_TO_LOWEST = True
 
 # How many fractional digits to use for all displayed values.
-RATIOS_FRACT_DIGITS = 3
-PRICES_FRACT_DIGITS = 2
+RATIOS_FRACT_DIGITS = 2
+PRICES_FRACT_DIGITS = 1
 QTY_FRACT_DIGITS = 3
 WGT_FRACT_DIGITS = 3
 VALUE_SHARE_FRACT_DIGITS = 1
@@ -131,11 +131,23 @@ PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
                    'format': 'json'},
                   {'USD'},
                   ('query', 'results', 'quote', ('Symbol', 'LastTradePriceOnly')), '","', '%1%%2%=X'),
+             'http://winkdex.com/static/js/stats.js':
+                 ({},
+                  {'USD'},
+                  ('winkdex_usd',), '', ''),
              'https://www.bitstamp.net/api/ticker/':
                  ({},
                   {'USD'},
                   ('bid',), '', ''),
-             'https://btcchina.com/bc/ticker':
+             'https://api.bitfinex.com/v1/pubticker/btcusd':
+                 ({},
+                  {'USD'},
+                  ('bid',), '', ''),
+             'http://market.huobi.com/staticmarket/ticker_btc_json.js':
+                 ({},
+                  {'CNY'},
+                  ('ticker', 'buy',), '', ''),
+             'https://data.btcchina.com/data/ticker':
                  ({},
                   {'CNY'},
                   ('ticker', 'buy'), '', ''),
@@ -147,30 +159,31 @@ PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
                  ({},
                   {'USD'},
                   ('Best Bid',), '', ''),
-             'https://data.mtgox.com/api/2/BTC%%%/money/ticker':
-                 ({},
-                  {'USD', 'AUD', 'CAD', 'CHF', 'CNY', 'DKK', 'EUR', 'GBP', 'HKD',
-                   'NZD', 'PLN', 'RUB', 'SGD', 'THB', 'NOK', 'CZK'},
-                  ('data', 'buy', 'value'), '', '%2%')
             }
 
 # Which exchange to use to provide the price for XBT.
 # Make sure that XBT_CUR is supported by the exchange.
-# Allowed values are 'bitstamp.net' (Europe)
+# Allowed values are:
+#                    'winkdex.com'  (USA)
+#                    'bitstamp.net' (Europe)
+#                    'bitfinex.com' (China)
+#                    'huobi.com'    (China)
 #                    'btcchina.com' (China)
 #                    'btc-e.com'    (Russia)
 #                    'campbx.com'   (USA)
-#                    'mtgox.com'    (Japan)
 # Note: part of the domain name can be omitted (eg. the .com) as long as there is no ambiguity.
 
 # Aliases for currency names that are retrieved from a certain provider.
 # The dict entries are: from-cur-alias: (provider, from-cur, to-cur)
 # An asterisc means "any" and can be used to set a default provider.
-CURS_MAP = {'XBT':    ('bitstamp.net',  'XBT', 'USD'),
-            'XBTM':   ('mtgox.com',     'XBT', 'USD'),
+CURS_MAP = {'XBT':    ('winkdex.com',   'XBT', 'USD'),
+            'XBTS':   ('bitstamp.net',  'XBT', 'USD'),
+            'XBTF':   ('bitfinex.com',  'XBT', 'USD'),
+            'XBTH':   ('huobi.com',     'XBT', 'CNY'),
             'XBTC':   ('btcchina.com',  'XBT', 'CNY'),
             'XBTE':   ('btc-e.com',     'XBT', 'USD'),
             'XBTA':   ('campbx.com',    'XBT', 'USD'),
+            'GOLD':   ('yahooapis.com', 'XAU', 'USD'),
             'SILVER': ('yahooapis.com', 'XAG', 'USD'),
             '*'   :   ('yahooapis.com',   '*', 'USD'),
            }
