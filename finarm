@@ -31,7 +31,7 @@ PORTFOLIO = {
 
 # Weight units for the metal quantities in the portfolio.
 # Allowed values are: 'mg' 'g' 'kg' 't' 'ozt'.
-WEIGHT_UNITS = ('kg', )
+WEIGHT_UNITS = ('g', )
 
 # Which currencies to use for the displayed prices.
 PRICE_CURS = ('USD', 'EUR', 'GBP', )
@@ -43,10 +43,10 @@ TOTAL_CURS = ('USD', 'EUR', 'GBP', )
 DISPLAY_HIGHEST_TO_LOWEST = True
 
 # How many fractional digits to use for all displayed values.
-RATIOS_FRACT_DIGITS = 2
-PRICES_FRACT_DIGITS = 1
-QTY_FRACT_DIGITS = 3
-WGT_FRACT_DIGITS = 3
+QUOTES_DIGITS = 4
+PRICES_DIGITS = 4
+QTY_DIGITS = 4
+WGT_FRACT_DIGITS = 0
 VALUE_SHARE_FRACT_DIGITS = 1
 VALUES_FRACT_DIGITS = 0
 
@@ -58,6 +58,9 @@ THOUSAND_SEPARATOR = "'"
 
 # Spaces between the table columns.
 COLUMNS_GAP = 2
+
+# Maximum quotes or ratios to display on a line
+MAX_PER_LINE = 5
 
 # Names to use for the columns labels. A label can be split in multiple lines by using '\n'.
 SYMBOL_LABEL = 'SYM'
@@ -72,6 +75,19 @@ def makeTotalLabel(cur): return 'VALUE\n' + cur
 
 # The weight label given the unit name.
 def makeWeightLabel(unit): return 'WGT\n' + unit.upper()
+
+from datetime import datetime, tzinfo
+
+# Makes the stock name of a future
+def makeFuture(s1, s2):
+    l = 'FGHJKMNQUVXZ'
+    now = datetime.now()
+    m = now.month + 1
+    y = now.year
+    if m > 12:
+        m = 1
+        y = y + 1
+    return s1 + l[m - 1] + str(y % 100) + s2
 
 # This will generate price labels for all currencies such as PRICE(USD), PRICE(GBP), PRICE(EUR)
 PRICE_LABELS = tuple(map(makePriceLabel, PRICE_CURS))
@@ -92,10 +108,56 @@ COLUMNS_WITH_TOTAL = WEIGHT_LABELS + (SHARE_LABEL,) + TOTAL_LABELS
 # Ratios to be displayed. A commonly followed ratio is gold/silver.
 RATIOS = (('XAU', 'XAG'),
           ('XBT', 'XAU'),
+          ('XPT', 'USD'),
+          ('XPD', 'USD'),
           ('EUR', 'USD'),
           ('GBP', 'EUR'),
           ('GBP', 'USD'),
+          ('USD', 'JPY'),
+          ('USD', 'SEK'),
          )
+
+from collections import OrderedDict
+
+# Quotes, mapped to more user-friendly names.
+# Notes:
+# - the 3 commented quotes currently can't be retrieved, probably
+#   because of some issues with Yahoo intellectual property.
+# - the 2 commented futures quotes currently don't work because they
+#   don't support quotes from the current or next month. They require
+#   some arbitrary month in the future that is hard to predict.
+QUOTES = OrderedDict([
+                ('GBTC',      'GBTC'),
+                ('DX-Y.NYB',  'USDX'),
+                ('^FVX',      'USTNO5Y'),
+                ('^TNX',      'USTNO10Y'),
+                ('^TYX',      'USTNO30Y'),
+                ('^VIX',      'VIX'),
+                ('^SPG1200',  'S&P1200'),
+                ('^GSPC',     'S&P500'),
+                ('^IXIC',     'NASDAQ'),
+                #('000300.SS', 'CSI300'),
+                #('000001.SS', 'SSE'),
+                ('^HSI',      'HSI'),
+                ('^N225',     'Nikkei225'),
+                ('^STOXX50E', 'ESTX50EUR'),
+                ('^GDAXI',    'DAX'),
+                ('^FTSE',     'FTSE100'),
+                ('^FCHI',     'CAC40'),
+                ('FTSEMIB.MI','MIB'),
+                #('^IBEX',     'IBEX35'),
+                ('FTSE.AT',   'ATHEX'),
+                ('CL.NYM',    'Oil'),
+                ('HG.CMX',    'Copper'),
+                ('NG.NYM',    'Gas'),
+                ('AAPL',      'AAPL'),
+                ('GOOG',      'GOOG'),
+                ('MSFT',      'MSFT'),
+                ('AMZN',      'AMZN'),
+                ('FB',        'FB'),
+                #makeFuture('C', '.CBT'),
+                #makeFuture('LB', '.CME'),
+                ])
 
 #--------------------- END OF USER EDITABLE VARIABLES ------------------------
 
@@ -119,12 +181,6 @@ TRANS = str.maketrans(dict((() if FRACT_SEPARATOR    == '.' else (('.', FRACT_SE
 # if sep is not '' then %%% is replaced by the symbols separated by sep and the last value of jsonKeys
 #                       must be a tuple with (symbolKey, valueKey) that is used for the array of dicts returned.
 # [{'Symbol': 'GBPUSD=X', 'Bid': '1.6167'}, {'Symbol': 'XAUUSD=X', 'Bid': '1335.6801'}]
-# Some providers can ban an IP address when too frequent requests are made. For bitstamp.net allows
-# a maximum of 600 request per 10 minutes.
-# Bitstamp conversion rate could also be used: https://www.bitstamp.net/api/eur_usd/
-# For bitstamp.net it can be 'bid' 'ask' 'last' 'high' 'low'.
-# For mtgox.com it can be 'buy' 'sell' 'last', and others.
-# For btcchina.com it can be 'buy' 'sell' 'last'
 PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
                  ({'q': 'select Symbol,LastTradePriceOnly from yahoo.finance.quotes where symbol in ("%%%")',
                    'env': 'store://datatables.org/alltableswithkeys',
@@ -159,6 +215,10 @@ PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
                  ({},
                   {'USD'},
                   ('Best Bid',), '', ''),
+             'https://api.coinbase.com/v1/prices/spot_rate?currency=USD':
+                 ({},
+                  {'USD'},
+                  ('amount',), '', ''),
             }
 
 # Which exchange to use to provide the price for XBT.
@@ -171,38 +231,42 @@ PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
 #                    'btcchina.com' (China)
 #                    'btc-e.com'    (Russia)
 #                    'campbx.com'   (USA)
+#                    'coinbase.com' (USA)
 # Note: part of the domain name can be omitted (eg. the .com) as long as there is no ambiguity.
 
+# TODO: rewrite this comment. It's wrong, aliases like XBTF don't really work.
 # Aliases for currency names that are retrieved from a certain provider.
 # The dict entries are: from-cur-alias: (provider, from-cur, to-cur)
 # An asterisc means "any" and can be used to set a default provider.
-CURS_MAP = {'XBT':    ('winkdex.com',   'XBT', 'USD'),
-            'XBTS':   ('bitstamp.net',  'XBT', 'USD'),
-            'XBTF':   ('bitfinex.com',  'XBT', 'USD'),
-            'XBTH':   ('huobi.com',     'XBT', 'CNY'),
-            'XBTC':   ('btcchina.com',  'XBT', 'CNY'),
-            'XBTE':   ('btc-e.com',     'XBT', 'USD'),
-            'XBTA':   ('campbx.com',    'XBT', 'USD'),
+CURS_MAP = {
+            'XBT':    ('yahooapis.com', 'BTC', 'USD'),
+            #'XBT':    ('coinbase.com',  'XBT', 'USD'),
+            #'XBT':    ('winkdex.com',   'XBT', 'USD'),
+            #'XBT':    ('bitfinex.com',  'XBT', 'USD'),
+            #'XBT':    ('btcchina.com',  'XBT', 'CNY'),
             'GOLD':   ('yahooapis.com', 'XAU', 'USD'),
             'SILVER': ('yahooapis.com', 'XAG', 'USD'),
             '*'   :   ('yahooapis.com',   '*', 'USD'),
            }
 
 # Number of seconds to wait between failed requests.
-PAUSE_ON_ERROR = 1.0
+PAUSE_ON_ERROR = 2.0
 
 #-------------------------------------------------------------------------------
 
 import json, sys, itertools, time
 from decimal import Decimal
 from urllib.request import Request, urlopen
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse, urlencode, unquote
 from functools import reduce
 from itertools import chain
 from multiprocessing import Pool
-from datetime import datetime, tzinfo
 
 ####### General purpose functions
+
+def partition(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
 
 # Returns the keys of a dictionary sorted by value, optionally in reverse order.
 def sortedKeys(d, rev = False):
@@ -247,7 +311,7 @@ def urlToDomain(url):
 # The only function that exchanges data with the net.
 def retrieveData(url):
     response = urlopen(Request(url,
-                               headers = {'User-Agent': 'curs'}))
+                               headers = {'User-Agent': 'https://github.com/andrea-chiavazza/finarm'}))
     return str(response.read(),
                encoding = 'utf8')
 
@@ -298,25 +362,43 @@ def makeDataRow(symbol, symbolsToPrice, curToSymbolToTotal, portfolio, totalPric
                        if totalPriceCur != 0
                        else ())))
 
-def makeRatios(symbolsToPrice, ratios):
-    text = (COLUMNS_GAP * ' ').join((ratio[0] + '/' + ratio[1] + ' = ' +
-                                     formatVal(symbolsToPrice[ratio[0]] / symbolsToPrice[ratio[1]],
-                                               RATIOS_FRACT_DIGITS,
-                                               0))
-                                    for ratio in ratios)
+def significantFigures(n, digits):
+    d = len(str(int(abs(n))))
+    return (digits - d) if digits > d else 0
+
+# digits are the significant figures
+def formatNumber(n, digits):
+    return formatVal(n, significantFigures(n, digits), 0)
+
+def getQuoteName(quote):
+    return QUOTES.get(quote, quote)
+
+def formatQuote(quote, symbolsToPrice):
+    if isinstance(quote, tuple):
+        return quote[0] + '/' + quote[1] + ':' + formatNumber(symbolsToPrice[quote[0]] / symbolsToPrice[quote[1]],
+                                                              QUOTES_DIGITS)
+    else:
+        return getQuoteName(quote) + ':' + formatNumber(symbolsToPrice[quote], QUOTES_DIGITS)
+
+def makeQuotes(symbolsToPrice, quotes):
+    text = '\n'.join((COLUMNS_GAP * ' ').join(formatQuote(quote, symbolsToPrice) for quote in quoteLine) \
+                     for quoteLine in partition(quotes, MAX_PER_LINE))
     return () if text == '' else ({'': text},)
 
-def getPricesFrom(provider, symbols, cur):
-    # Providers to retrieve symbols prices from.
-    # They are defined as url: (args, supportedCurrencies, jsonKeys, separator)
-    symbols = frozenset(symbols) - set((cur,))
+def makeForex(provider, symbols, cur):
     data = PROVIDERS[provider]
-    separator = data[3]
     pattern = data[4]
     symbolsToProvIds = {symbol: pattern.replace('%1%', symbolForAlias(symbol))
                                        .replace('%2%', cur)
                         for symbol in symbols}
-    patterns = separator.join(symbolsToProvIds.values())
+    return symbolsToProvIds
+
+def getPricesFrom(provider, symbols, cur):
+    # Providers to retrieve symbols prices from.
+    # They are defined as url: (args, supportedCurrencies, jsonKeys, separator)
+    data = PROVIDERS[provider]
+    separator = data[3]
+    patterns = separator.join(symbols.values())
     reqs = {kv[0]: kv[1].replace('%%%', patterns)
             for kv in data[0].items()}
     supportedCurrencies = data[1]
@@ -343,8 +425,8 @@ def getPricesFrom(provider, symbols, cur):
                 kv = jsonKeys[-1]
                 provIdsToCur = {price[kv[0]]: Decimal(price[kv[1]])
                                 for price in prices}
-                result = dict((symbol, provIdsToCur[symbolsToProvIds[symbol]])
-                              for symbol in symbols)
+                result = dict((key, provIdsToCur[symbols[key]])
+                              for key in symbols)
         except:
             result = None
             print(' *', end='')
@@ -353,7 +435,7 @@ def getPricesFrom(provider, symbols, cur):
             continue
     print( ' ' + urlToDomain(provider), end = '')
     sys.stdout.flush()
-    return assoc(result, cur, Decimal(1.0))
+    return (result if cur == '' else assoc(result, cur, Decimal(1.0)))
 
 # The dict entries are: fromCurAlias: (provider, fromCur, toCur)
 def getPrices(symbols):
@@ -363,7 +445,10 @@ def getPrices(symbols):
     pool = Pool(processes = len(providersToSymbols))
     results = tuple(pool.apply_async(getPricesFrom,
                                      (providerAndSymbols[0],
-                                      providerAndSymbols[1],
+                                      mergeDicts((makeForex(providerAndSymbols[0],
+                                                            symbols,
+                                                            curForSymbol(providerAndSymbols[1][0])),
+                                                  {q:q for q in QUOTES.keys()})),
                                       curForSymbol(providerAndSymbols[1][0])))
                     for providerAndSymbols in providersToSymbols.items())
     pool.close()
@@ -375,7 +460,7 @@ def getPrices(symbols):
 
 def getData(portfolio):
     symbolsNeeded = (frozenset(portfolio.keys()) | set(PRICE_CURS) | set(TOTAL_CURS)) | \
-                    reduce(lambda a, b: set(a) | set(b), RATIOS, set())
+                    reduce(lambda a, b: set(a) | (set((b,)) if isinstance(b, str) else set(b)), RATIOS, set())
     symbolsToPrice = getPrices(symbolsNeeded | {curForSymbol(x) for x in symbolsNeeded})
     totalsCur = {symbol: getPortfolioQuantity(portfolio, symbol, PRICE_WEIGHT_UNIT) * symbolsToPrice[symbol]
                  for symbol in portfolio}
@@ -390,10 +475,10 @@ def getData(portfolio):
                          for data in symbolsData)
               for label in COLUMNS_WITH_TOTAL}
     totalsLines = {label: LINE_CHAR * len(formatVal(totals[label],
-                                                    getFractDigits(label),
+                                                    getFractDigits(label, totals[label]),
                                                     0))
                    for label in totals}
-    return makeRatios(symbolsToPrice, RATIOS) + symbolsData + (totalsLines,) + (totals,)
+    return makeQuotes(symbolsToPrice, RATIOS + tuple(QUOTES.keys())) + symbolsData + (totalsLines,) + (totals,)
 
 # If l > 0 spaces will be added to the left to reach the length of l.
 def formatVal(val, fractDigits, l):
@@ -407,11 +492,13 @@ def formatVal(val, fractDigits, l):
     else:
         raise Exception('Unsupported type for value \'' + str(val) + '\'')
 
-def getFractDigits(colName):
+def getFractDigits(colName, n):
+    if isinstance(n, str):
+        return 0
     if colName in PRICE_LABELS:
-        return PRICES_FRACT_DIGITS
+        return significantFigures(n, PRICES_DIGITS)
     elif colName == QUANTITY_LABEL:
-        return QTY_FRACT_DIGITS
+        return significantFigures(n, QTY_DIGITS)
     elif colName in WEIGHT_LABELS:
         return WGT_FRACT_DIGITS
     elif colName == SHARE_LABEL:
@@ -427,7 +514,7 @@ def formatRow(d, nonEmptyCols, colSizes):
         return '\n'
     elif any(bool(val) for val in d.values()): 
         return ''.join(formatVal(d.get(col, ''),
-                                 getFractDigits(col),
+                                 getFractDigits(col, d.get(col, '')),
                                  colSizes[col])
                        for col in nonEmptyCols) + '\n'
     else:
@@ -435,7 +522,7 @@ def formatRow(d, nonEmptyCols, colSizes):
 
 def makeTextTable(dicts, nonEmptyCols):
     colSizes = {col: max(len(formatVal(d.get(col, ''),
-                                       getFractDigits(col),
+                                       getFractDigits(col, d.get(col, '')),
                                        0))
                          for d in dicts)
                      + (COLUMNS_GAP if col != nonEmptyCols[0] else 0)
@@ -446,7 +533,7 @@ def makeTextTable(dicts, nonEmptyCols):
            ''.join(formatRow(d, nonEmptyCols, colSizes)
                    for d in dicts if '' not in d)
 
-def makeData(dicts, columns):
+def formatData(dicts, columns):
     nonEmptyCols = tuple(col for col in columns
                          if any(col in row and bool(row[col])
                                 for row in dicts))
@@ -464,5 +551,5 @@ print(datetime.now().replace(microsecond = 0).isoformat(' ') + ' - Prices from:'
 
 sys.stdout.flush()
 
-print('\n' + makeData(getData(PORTFOLIO), LABELS_ORDER),
+print('\n' + formatData(getData(PORTFOLIO), LABELS_ORDER),
       end = '')
