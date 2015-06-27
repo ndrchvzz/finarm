@@ -23,10 +23,10 @@
 # Having currencies with a quantity of 0 can be useful to have their price displayed even
 # when they are not part of the portfolio.
 PORTFOLIO = {
-'XAU': {'g': '100', 'ozt':  '2'},
-'XAG': {'kg': '12', 'ozt': '18'},
-'XBT':    '3.2',
-'EUR': '1500',
+'XAU': {'g':  100, 'ozt':  2},
+'XAG': {'kg':  12, 'ozt': 18},
+'XBT':    3.2,
+'EUR': 1500,
 }
 
 # Weight units for the metal quantities in the portfolio.
@@ -115,6 +115,7 @@ RATIOS = (('XAU', 'XAG'),
           ('GBP', 'USD'),
           ('USD', 'JPY'),
           ('USD', 'SEK'),
+          ('XAU', 'CL.NYM'),
          )
 
 from collections import OrderedDict
@@ -375,8 +376,10 @@ def getQuoteName(quote):
 
 def formatQuote(quote, symbolsToPrice):
     if isinstance(quote, tuple):
-        return quote[0] + '/' + quote[1] + ':' + formatNumber(symbolsToPrice[quote[0]] / symbolsToPrice[quote[1]],
-                                                              QUOTES_DIGITS)
+        return QUOTES.get(quote[0], quote[0]) + '/' + \
+               QUOTES.get(quote[1], quote[1]) + ':' + \
+               formatNumber(symbolsToPrice[quote[0]] / symbolsToPrice[quote[1]],
+                            QUOTES_DIGITS)
     else:
         return getQuoteName(quote) + ':' + formatNumber(symbolsToPrice[quote], QUOTES_DIGITS)
 
@@ -441,19 +444,29 @@ def getPricesFrom(provider, symbols, cur):
 def getPrices(symbols):
     # group all symbols by their provider by looking at PROVIDERS
     providersToSymbols = groupBy(providerForSymbol, symbols)
-    # make one query for each provider
-    pool = Pool(processes = len(providersToSymbols))
-    results = tuple(pool.apply_async(getPricesFrom,
-                                     (providerAndSymbols[0],
+    if (len(providersToSymbols) == 1):
+        results = tuple(getPricesFrom(providerAndSymbols[0],
                                       mergeDicts((makeForex(providerAndSymbols[0],
                                                             symbols,
                                                             curForSymbol(providerAndSymbols[1][0])),
                                                   {q:q for q in QUOTES.keys()})),
-                                      curForSymbol(providerAndSymbols[1][0])))
-                    for providerAndSymbols in providersToSymbols.items())
-    pool.close()
-    pool.join()
-    merged = mergeDicts(res.get() for res in results)
+                                      curForSymbol(providerAndSymbols[1][0]))
+                        for providerAndSymbols in providersToSymbols.items())
+        merged = mergeDicts(results)
+    else:
+        # make one query for each provider
+        pool = Pool(processes = len(providersToSymbols))
+        results = tuple(pool.apply_async(getPricesFrom,
+                                         (providerAndSymbols[0],
+                                          mergeDicts((makeForex(providerAndSymbols[0],
+                                                                symbols,
+                                                                curForSymbol(providerAndSymbols[1][0])),
+                                                      {q:q for q in QUOTES.keys()})),
+                                          curForSymbol(providerAndSymbols[1][0])))
+                        for providerAndSymbols in providersToSymbols.items())
+        pool.close()
+        pool.join()
+        merged = mergeDicts(res.get() for res in results)
     # return all merged results
     return {kv[0]: kv[1] * merged[curForSymbol(kv[0])]
             for kv in merged.items()}
@@ -551,5 +564,6 @@ print(datetime.now().replace(microsecond = 0).isoformat(' ') + ' - Prices from:'
 
 sys.stdout.flush()
 
-print('\n' + formatData(getData(PORTFOLIO), LABELS_ORDER),
+print('\n' + formatData(getData(PORTFOLIO),
+                        LABELS_ORDER),
       end = '')
