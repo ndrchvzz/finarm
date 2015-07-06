@@ -9,24 +9,25 @@ The script produces some text with the quotes and the value of your portfolio.
 An example of the output produced:
 
 ```
-2015-07-06 22:34:26 - Prices from: query.yahooapis.com
-XAU/XAG:74.41  XBT/XAU:0.235  XPT/USD:1'066  XPD/USD:675.2  EUR/USD:1.106
-GBP/EUR:1.411  GBP/USD:1.560  USD/JPY:122.0  USD/SEK:8.460  XAU/Oil:19.77
-GBTC:30.50  USDX:96.26  USTNO5Y:1.550  USTNO10Y:2.280  USTNO30Y:3.070
-VIX:17.01  S&P1200:1'914  S&P500:2'069  NASDAQ:4'992  HSI:25'236
-Nikkei225:20'112  ESTX50EUR:3'365  DAX:10'891  FTSE100:6'536  CAC40:4'712
-MIB:21'601  ATHEX:241.2  Oil:59.20  Copper:2.540  Gas:2.810
-AAPL:126.0  GOOG:522.9  MSFT:44.39  AMZN:436.0  FB:87.55
+2015-07-06 23:33:25 - Prices from: query.yahooapis.com
+XAU/XAG:74.42  XBT/XAU:0.233  XPT/USD:1'066  XPD/USD:675.2  EUR/USD:1.105
+USD/CNY:6.207  GBP/EUR:1.411  GBP/USD:1.560  USD/JPY:122.0  USD/SEK:8.460
+XAU/Oil:19.77  GBTC:30.50  USDX:96.25  USTNO5Y:1.550  USTNO10Y:2.280
+USTNO30Y:3.070  VIX:17.01  S&P1200:1'914  S&P500:2'069  NASDAQ:4'992
+HSI:25'236  Nikkei225:20'112  ESTX50EUR:3'365  DAX:10'891  FTSE100:6'536
+CAC40:4'712  MIB:21'601  ATHEX:241.2  Oil:59.20  Copper:2.540
+Gas:2.810  AAPL:126.0  GOOG:522.9  MSFT:44.39  AMZN:436.0
+FB:87.55
 
 SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE   VALUE   VALUE   VALUE
        USD    EUR    GBP             G      %     USD     EUR     GBP
 
-XAU  1'170  1'058  750.0  13.22    411   77.8  15'464  13'987   9'911
-XBT  275.3  249.0  176.5  10.00          13.9   2'753   2'490   1'765
-USD  1.000  0.904  0.641  1'000           5.0   1'000     904     641
-XAG  15.73  14.22  10.08  42.15  1'311    3.3     663     600     425
+XAU  1'170  1'059  750.1  13.22    411   77.9  15'466  13'992   9'913
+XBT  272.9  246.9  174.9  10.00          13.7   2'729   2'469   1'749
+USD  1.000  0.905  0.641  1'000           5.0   1'000     905     641
+XAG  15.73  14.23  10.08  42.15  1'311    3.3     663     600     425
                                  -----  -----  ------  ------  ------
-                                 1'722  100.0  19'880  17'981  12'741
+                                 1'722  100.0  19'859  17'965  12'728
 ```
 
 Various options to change the format of the output can be set by editing a few variables at the beginning of the script.  
