@@ -4,8 +4,8 @@ finarm
 Financial Armageddon - keeps track of the value of your currency and precious metal assets.
 
 Simply edit the lines at the beginning of the script with the value of your assets and
-the quotes you want to track and run it.
-The script produces some text with the quotes and the value of your portfolio.
+the quotes you want to track and run it.  
+The script produces some text with the quotes and the value of your portfolio.  
 An example of the output produced:
 
 ```
@@ -29,8 +29,8 @@ XAG  15.73  14.22  10.08  42.15  1'311    3.3     663     600     425
                                  1'722  100.0  19'880  17'981  12'741
 ```
 
-Various options to change the format of the output can be set by editing a few variables at the beginning of the script.
-You can also use the -h switch to print only the quotes and not the portfolio.
+Various options to change the format of the output can be set by editing a few variables at the beginning of the script.  
+The only accepted argument is -h to print only the quotes and not the portfolio.
 
 If you are running it on a unix-like system you can have a window displaying the output refreshed every 60 seconds by running:
 ```
