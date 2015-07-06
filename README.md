@@ -9,27 +9,28 @@ The script produces some text with the quotes and the value of your portfolio.
 An example of the output produced:
 
 ```
-2015-06-28 00:01:41 - Prices from: query.yahooapis.com
-XAU/XAG:74.66  XBT/XAU:0.214  XPT/USD:1'081  XPD/USD:678.0  EUR/USD:1.117
-GBP/EUR:1.410  GBP/USD:1.575  USD/JPY:123.5  USD/SEK:8.299  XAU/Oil:19.84
-GBTC:29.00  USDX:95.40  USTNO5Y:1.750  USTNO10Y:2.480  USTNO30Y:3.250
-VIX:14.02  S&P1200:1'970  S&P500:2'101  NASDAQ:5'081  HSI:26'664
-Nikkei225:20'706  ESTX50EUR:3'621  DAX:11'492  FTSE100:6'754  CAC40:5'059
-MIB:23'800  ATHEX:241.2  Oil:59.20  Copper:2.650  Gas:2.810
-AAPL:126.8  GOOG:531.7  MSFT:45.26  AMZN:438.1  FB:88.01
+2015-07-06 22:34:26 - Prices from: query.yahooapis.com
+XAU/XAG:74.41  XBT/XAU:0.235  XPT/USD:1'066  XPD/USD:675.2  EUR/USD:1.106
+GBP/EUR:1.411  GBP/USD:1.560  USD/JPY:122.0  USD/SEK:8.460  XAU/Oil:19.77
+GBTC:30.50  USDX:96.26  USTNO5Y:1.550  USTNO10Y:2.280  USTNO30Y:3.070
+VIX:17.01  S&P1200:1'914  S&P500:2'069  NASDAQ:4'992  HSI:25'236
+Nikkei225:20'112  ESTX50EUR:3'365  DAX:10'891  FTSE100:6'536  CAC40:4'712
+MIB:21'601  ATHEX:241.2  Oil:59.20  Copper:2.540  Gas:2.810
+AAPL:126.0  GOOG:522.9  MSFT:44.39  AMZN:436.0  FB:87.55
 
-SYM  PRICE  PRICE  PRICE    QTY     WGT  VALUE   VALUE   VALUE  VALUE
-       USD    EUR    GBP              G      %     USD     EUR    GBP
+SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE   VALUE   VALUE   VALUE
+       USD    EUR    GBP             G      %     USD     EUR     GBP
 
-XAG  15.74  14.09  9.992  403.8  12'560   42.5   6'354   5'689  4'035
-XAU  1'175  1'052  746.0  5.215     162   40.9   6'127   5'486  3'891
-EUR  1.117  1.000  0.709  1'500           11.2   1'675   1'500  1'064
-XBT  251.8  225.5  159.9  3.200            5.4     806     721    512
-                                 ‒‒‒‒‒‒  ‒‒‒‒‒  ‒‒‒‒‒‒  ‒‒‒‒‒‒  ‒‒‒‒‒
-                                 12'722  100.0  14'962  13'397  9'501
+XAU  1'170  1'058  750.0  13.22    411   77.8  15'464  13'987   9'911
+XBT  275.3  249.0  176.5  10.00          13.9   2'753   2'490   1'765
+USD  1.000  0.904  0.641  1'000           5.0   1'000     904     641
+XAG  15.73  14.22  10.08  42.15  1'311    3.3     663     600     425
+                                 -----  -----  ------  ------  ------
+                                 1'722  100.0  19'880  17'981  12'741
 ```
 
 Various options to change the format of the output can be set by editing a few variables at the beginning of the script.
+You can also use the -h switch to print only the quotes and not the portfolio.
 
 If you are running it on a unix-like system you can have a window displaying the output refreshed every 60 seconds by running:
 ```

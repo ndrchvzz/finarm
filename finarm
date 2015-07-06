@@ -20,13 +20,12 @@
 # For all currency symbols see: http://en.wikipedia.org/wiki/ISO_4217
 # Currency quantities must be defined by a number.
 # Metal quatities must be defined by a map of weight units to quatities.
-# Having currencies with a quantity of 0 can be useful to have their price displayed even
-# when they are not part of the portfolio.
+# Give a -h argument to display only the quotes and not the portfolio.
 PORTFOLIO = {
-'XAU': {'g':  100, 'ozt':  2},
-'XAG': {'kg':  12, 'ozt': 18},
-'XBT':    3.2,
-'EUR': 1500,
+'XAU': {'g': 100, 'ozt': 10},
+'XAG': {'kg':  1, 'ozt': 10},
+'XBT':   10,
+'USD': 1000,
 }
 
 # Weight units for the metal quantities in the portfolio.
@@ -169,7 +168,8 @@ METALS = frozenset({'XAG', 'XAU', 'XPD', 'XPT'})
 PRICE_WEIGHT_UNIT = 'ozt'
 
 # Character to be used for the lines that separate the totals.
-LINE_CHAR = '\u2012' # this is a horizontal line that takes the full width.
+# You can try '\u2012' for a better looking line.
+LINE_CHAR = '-'
 
 # This constant is created to avoid running the same code many times.
 TRANS = str.maketrans(dict((() if FRACT_SEPARATOR    == '.' else (('.', FRACT_SEPARATOR),)) +
@@ -235,7 +235,6 @@ PROVIDERS = {'http://query.yahooapis.com/v1/public/yql':
 #                    'coinbase.com' (USA)
 # Note: part of the domain name can be omitted (eg. the .com) as long as there is no ambiguity.
 
-# TODO: rewrite this comment. It's wrong, aliases like XBTF don't really work.
 # Aliases for currency names that are retrieved from a certain provider.
 # The dict entries are: from-cur-alias: (provider, from-cur, to-cur)
 # An asterisc means "any" and can be used to set a default provider.
@@ -541,10 +540,11 @@ def makeTextTable(dicts, nonEmptyCols):
                      + (COLUMNS_GAP if col != nonEmptyCols[0] else 0)
                 for col in nonEmptyCols}
     return ''.join(d[''] + '\n'
-                   for d in dicts if '' in d) + \
-           '\n' + \
+                   for d in dicts if '' in d) + ((
+           '\n' +
            ''.join(formatRow(d, nonEmptyCols, colSizes)
-                   for d in dicts if '' not in d)
+                   for d in dicts if '' not in d)) if len(sys.argv) < 2 or sys.argv[1] != '-h'
+                                                   else '')
 
 def formatData(dicts, columns):
     nonEmptyCols = tuple(col for col in columns
@@ -556,7 +556,7 @@ def formatData(dicts, columns):
                        for col in lineSplitCols if len(lineSplitCols[col]) > titleRowN}
                       for titleRowN in range(max(map(len,
                                                      lineSplitCols.values()))))
-    return str(makeTextTable(titleRows + ({},) + dicts, nonEmptyCols))
+    return makeTextTable(titleRows + ({},) + dicts, nonEmptyCols)
 
 # Execution starting point
 print(datetime.now().replace(microsecond = 0).isoformat(' ') + ' - Prices from:',
