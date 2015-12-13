@@ -9,25 +9,27 @@ The script produces some text with the quotes and the value of your portfolio.
 An example of the output produced:
 
 ```
-2015-07-06 23:33:25 - Prices from: query.yahooapis.com
-XAU/XAG:74.42  XBT/XAU:0.233  XPT/USD:1'066  XPD/USD:675.2  EUR/USD:1.105
-USD/CNY:6.207  GBP/EUR:1.411  GBP/USD:1.560  USD/JPY:122.0  USD/SEK:8.460
-XAU/Oil:19.77  GBTC:30.50  USDX:96.25  USTNO5Y:1.550  USTNO10Y:2.280
-USTNO30Y:3.070  VIX:17.01  S&P1200:1'914  S&P500:2'069  NASDAQ:4'992
-HSI:25'236  Nikkei225:20'112  ESTX50EUR:3'365  DAX:10'891  FTSE100:6'536
-CAC40:4'712  MIB:21'601  ATHEX:241.2  Oil:59.20  Copper:2.540
-Gas:2.810  AAPL:126.0  GOOG:522.9  MSFT:44.39  AMZN:436.0
-FB:87.55
+2015-12-13 21:12:09 - sent 924 received 3392 from yahoo.co.uk
+XAU/XAG=77.50  XBT/XAU=0.409  XPT/USD=843.5  XPD/USD=544.0  EUR/USD=1.099  USD/CNY=6.458
+GBP/EUR=1.385  GBP/USD=1.522  USD/JPY=121.1  USD/SEK=8.506
 
-SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE   VALUE   VALUE   VALUE
-       USD    EUR    GBP             G      %     USD     EUR     GBP
+GBTC=63.00  NYXBT=433.5  USDX=97.68  USTNO5Y=1.570  USTNO10Y=2.140  USTNO30Y=2.880
+VIX=24.39  S&P1200=1'807  S&P500=2'012  NASDAQ=4'933  HSI=21'464  Nikkei225=19'230
+ESTX50EUR=3'203  DAX=10'340  FTSE100=5'953  CAC40=4'550  MIB=21'015  ATHEX=170.0
+Gold=1'076  Silver=13.89  Platinum=877.7  Palladium=542.3  Aluminum=1'595  Copper=2.096
+Oil=39.39  Gas=2.195  Corn=373.0  Oats=267.0  Cattle=121.2  Hogs=56.00
+Cotton=62.27  Coffee=118.1  Cocoa=3'350  AAPL=113.2  GOOG=738.9  MSFT=54.06
+AMZN=640.2  FB=102.1  FCAU=13.60
 
-XAU  1'170  1'059  750.1  13.22    411   77.9  15'466  13'992   9'913
-XBT  272.9  246.9  174.9  10.00          13.7   2'729   2'469   1'749
-USD  1.000  0.905  0.641  1'000           5.0   1'000     905     641
-XAG  15.73  14.23  10.08  42.15  1'311    3.3     663     600     425
-                                 -----  -----  ------  ------  ------
-                                 1'722  100.0  19'859  17'965  12'728
+SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE   VALUE   VALUE   VALUE  VALUE  VALUE
+       USD    EUR    GBP             g      %     USD     EUR     GBP    XBT    XAU
+
+XAU  1'074  977.1  705.5  10.20    317   49.1  10'954   9'965   7'195  24.92  10.20
+XBT  439.5  399.8  288.6  18.00          35.5   7'911   7'196   5'196  18.00   7.37
+XAG  13.86  12.61  9.102  133.6  4'156    8.3   1'852   1'684   1'216   4.21   1.72
+EUR  1.099  1.000  0.722  1'450           7.1   1'594   1'450   1'047   3.62   1.45
+                                 -----  -----  ------  ------  ------  -----  -----
+                                 4'473  100.0  22'310  20'296  14'653  50.76  20.74
 ```
 
 Various options to change the format of the output can be set by editing a few variables at the beginning of the script.  
