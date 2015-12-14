@@ -33,7 +33,6 @@ EUR  1.099  1.000  0.722  1'450           7.1   1'594   1'450   1'047   3.62   1
 ```
 
 Various options to change the format of the output can be set by editing a few variables at the beginning of the script.  
-The only accepted argument is -h to print only the quotes and not the portfolio.
 
 If you are running it on a unix-like system you can have a window displaying the output refreshed every 60 seconds by running:
 ```
