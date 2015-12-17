@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# finarm - Financial Armageddon - version 1.0
-# Keeps track of the value of a currency and precious metals portfolio using prices retrieved from the net.
+# finarm - Financial Armageddon
+# Keeps track of the value of a currency and precious metals portfolio using
+# prices retrieved from the net.
+
+# Copyright 2015 Andrea Chiavazza
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Just enter the amount of assets you own below.
 # Look at the options below for further customizations.
 
-# Developed by Andrea Chiavazza
-# Licensed under Apache License 2.0
 # If you find this program useful, you can donate to the
 # bitcoin address 12f1khXXGp6vW6NizjRdfTgZDGWJdrna8i
 
@@ -18,19 +32,20 @@
 # XAU (gold), XAG (silver), XPD (palladium), XPT (platinum)
 # XBT (bitcoin) is being evaluated for inclusion in the ISO 4217 standard.
 # For all currency symbols see: http://en.wikipedia.org/wiki/ISO_4217
+# Currency quantities must be defined by a number.
 # Metal quatities must be defined by a map of weight units to quatities.
-XAU_G =  (20 * 12 +
-          10 *  1 +
-           1 *  5)
+XAU_G =  (20 * 1 +
+          10 * 1 +
+           1 * 1)
 
-XAG_G = (1000 *  3 +
-          100 * 10)
+XAG_G = (1000 * 1 +
+          100 * 1)
 
 PORTFOLIO = {
-'XAU': {'g': XAU_G, 'ozt': 2},
-'XAG': {'g': XAG_G, 'ozt': 5},
-'XBT':   18,
-'EUR': 1450
+'XAU': {'g': XAU_G, 'ozt': 1},
+'XAG': {'g': XAG_G, 'ozt': 1},
+'XBT': 1,
+'GBP': 1,
 }
 
 # Weight units for the metal quantities in the portfolio.
@@ -69,23 +84,18 @@ PRICE_LABEL = 'PRICE'
 VALUE_LABEL = 'VALUE'
 WEIGHT_LABEL = 'WGT'
 
-# Which columns to display and in what order.
-# Columns with no values will not be shown.
-#LABELS_ORDER = (SYMBOL_LABEL, PRICE_LABEL, QUANTITY_LABEL, WEIGHT_LABEL, VALUE_LABEL)
-
 # Which columns should have a sum of all values displayed at the bottom.
 COLUMNS_WITH_TOTAL = (WEIGHT_LABEL, VALUE_LABEL)
 
 from datetime import datetime
 
-# Makes the stock name of a future
-def makeFuture(prefix, suffix):
+# Makes the Yahoo symbol of a future.
+def makeFuture(prefix, suffix, months=0):
     monthCodes = 'FGHJKMNQUVXZ'
     now = datetime.now()
-    # m is the month (0-based)
-    m = now.month
+    # now.month is the 0-based month
+    m = now.month + months
     y = now.year
-    # if m is increased
     if m > 12:
         y = y + m / 12
         m = m % 12
@@ -127,6 +137,12 @@ QUOTES = OrderedDict([
                 ('^FCHI',     'CAC40'),
                 ('FTSEMIB.MI','MIB'),
                 ('FTSE.AT',   'ATHEX'),
+                ('AAPL',      'AAPL'),
+                ('GOOG',      'GOOG'),
+                ('MSFT',      'MSFT'),
+                ('AMZN',      'AMZN'),
+                ('FB',        'FB'),
+                ('FCAU',      'FCAU'),
                 (makeFuture('GC',  '.CMX'), 'Gold'),
                 (makeFuture('SI',  '.CMX'), 'Silver'),
                 (makeFuture('PL',  '.NYM'), 'Platinum'),
@@ -142,12 +158,6 @@ QUOTES = OrderedDict([
                 (makeFuture('CT',  '.NYB'), 'Cotton'),
                 (makeFuture('KC',  '.NYB'), 'Coffee'),
                 (makeFuture('CC',  '.NYB'), 'Cocoa'),
-                ('AAPL',      'AAPL'),
-                ('GOOG',      'GOOG'),
-                ('MSFT',      'MSFT'),
-                ('AMZN',      'AMZN'),
-                ('FB',        'FB'),
-                ('FCAU',      'FCAU'),
                 ])
 
 #--------------------- END OF USER EDITABLE VARIABLES ------------------------
@@ -159,7 +169,7 @@ METALS = frozenset({'XAG', 'XAU', 'XPD', 'XPT'})
 PRICE_WEIGHT_UNIT = 'ozt'
 
 # Character to be used for the lines that separate the totals.
-# You can try '\u2012' for a better looking line.
+# Try '\u2012' for a better looking line.
 LINE_CHAR = '-'
 
 # This constant is created to avoid running the same code many times.
@@ -259,8 +269,8 @@ def formatSignif(n, signif):
 
 # Returns a map of symbols to Decimal with the prices retrieved from Yahoo Finance.
 def getYahooQuotes(ratios, quotes):
-    symbols = tuple(makeYahooSymbolRatio(first(ratio), second(ratio))
-                    for ratio in ratios) \
+    symbols = tuple(makeYahooSymbolRatio(ratioNum, ratioDen)
+                    for ratioNum, ratioDen in ratios) \
               + quotes
     params = {'q': 'select Symbol,LastTradePriceOnly from yahoo.finance.quotes where symbol in ("' +
             (','.join(symbols)) + '")',
@@ -279,12 +289,12 @@ def makeYahooSymbolRatio(sym1, sym2):
 # Returns a map of Yahoo symbols to their current prices.
 def getPrices(portfolio, priceCurs, totalCurs, ratios, quotes):
     ratiosNeeded = union(itertools.product(portfolio.keys(), union(priceCurs, totalCurs)), ratios)
-    ratiosNeededNoRepeat = filter(lambda ratio: first(ratio) != second(ratio),
-                                  ratiosNeeded)
+    ratiosNeededNoRepeat = (ratio for ratio in ratiosNeeded
+                                  if first(ratio) != second(ratio))
     return mergeDicts(getYahooQuotes(ratiosNeededNoRepeat, tuple(quotes.keys())),
-                      {makeYahooSymbolRatio(first(sym), second(sym)): Decimal(1)
-                       for sym in filter(lambda ratio: first(ratio) == second(ratio),
-                                         ratiosNeeded)})
+                      {makeYahooSymbolRatio(ratioNum, ratioDen): Decimal(1)
+                       for (ratioNum, ratioDen) in ratiosNeeded
+                       if ratioNum == ratioDen})
 
 # Returns a string padded on the left with spaces, if its length is smaller than n.
 def leftPad(s, n):
@@ -300,39 +310,38 @@ def formatColumn(titles, data, signif, sortedSymbols):
         fract = min(tuple(significantDigits(data[sym], signif)
                           for sym in sortedSymbols) + (significantDigits(tot, signif),))
         rows = tuple(formatFract(data[sym], fract)
-                    for sym in sortedSymbols)
-        formTot = formatFract(tot, fract)
-        c = LINE_CHAR
+                     for sym in sortedSymbols)
+        totSep = LINE_CHAR
+        totStr = formatFract(tot, fract)
     else:
         rows = tuple(formatSignif(data[sym], signif) for sym in sortedSymbols)
-        formTot = ''
-        c = ' '
-    maxl = max(len(s) for s in titles + rows + (formTot,))
+        totSep = ' '
+        totStr = ''
+    maxl = max(len(s) for s in titles + rows + (totStr,))
 
     return (tuple(leftPad(s, maxl)
                   for s in titles),) + \
-            tuple(leftPad(s, maxl)
-                  for s in rows) + \
-            (c * maxl, leftPad(formTot, maxl))
+           tuple(leftPad(s, maxl)
+                 for s in rows) + \
+           (totSep * maxl, leftPad(totStr, maxl))
 
 def convertPrice(qty, fromCur, toCur, symbolsToPrice):
     return qty * symbolsToPrice[makeYahooSymbolRatio(fromCur, toCur)]
 
 def formatRatio(ratio, symbolsToPrice, signif):
     return first(ratio) + '/' + second(ratio) + '=' + \
-           formatSignif(symbolsToPrice[makeYahooSymbolRatio(first(ratio), second(ratio))], signif)
+           formatSignif(symbolsToPrice[makeYahooSymbolRatio(first(ratio),
+                                                            second(ratio))],
+                        signif)
 
 def formatQuote(quote, symbolsToPrice, signif):
     return second(quote) + '=' + formatSignif(symbolsToPrice[first(quote)], signif)
 
 def formatPrices(ratios, symbolsToPrice, formatter, columns, signif, gap):
-    fquotes = tuple(formatter(ratio, symbolsToPrice, signif) for ratio in ratios)
-    text = ''
-    for part in partition(fquotes, columns):
-        for s in gap.join(part):
-            text = text + s
-        text += '\n'
-    return text
+    fquotes = tuple(formatter(ratio, symbolsToPrice, signif)
+                    for ratio in ratios)
+    return '\n'.join(gap.join(part)
+                     for part in partition(fquotes, columns))
 
 def formatCols(portfolio, symbolsToPrice):
     symbols = tuple(portfolio.keys())
@@ -368,42 +377,41 @@ def formatCols(portfolio, symbolsToPrice):
     return (fsym,) + fprice + (fqty,) + fwgt + (fshare,) + fvalues
 
 def formatPortfolio(portfolio, symbolsToPrice, gap):
+    if not portfolio:
+        return ''
     cols = formatCols(portfolio, symbolsToPrice)
     titles = tuple(first(a) for a in cols)
-    titleRowsNo = max(tuple(len(a) for a in titles))
-    # format titles
-    text = ''
-    for titleRow in range(0, titleRowsNo):
-        text += gap.join(title[titleRow] if len(title) > titleRow
-                         else ' ' * len(title[titleRow - 1])
-                        for title in titles) + '\n'
-    text += '\n'
-    # format symbol rows
-    for row in range(1, len(second(cols))):
-        text += gap.join(col[row] for col in cols) + '\n'
-    return text
+    titleRowsNo = max(len(a) for a in titles)
+    # returns: titles + empty-line + rows
+    return '\n'.join(gap.join(title[titleRow] if len(title) > titleRow
+                              else ' ' * len(title[titleRow - 1])
+                              for title in titles)
+                     for titleRow in range(0, titleRowsNo)) + \
+           '\n\n' + \
+           '\n'.join(gap.join(col[row] for col in cols)
+                     for row in range(1, len(second(cols))))
 
 def computeColumn(symbols, func, units):
     if not units:
-        result = {sym: func(sym)
-                  for sym in symbols}
+        return {sym: func(sym)
+                for sym in symbols}
     else:
-        result = OrderedDict((unit, {sym: func(sym, unit)
-                                     for sym in symbols})
-                             for unit in units)
-    return result
+        return OrderedDict((unit, {sym: func(sym, unit)
+                                   for sym in symbols})
+                           for unit in units)
 
 def assertEquals(actual, expected):
     if actual != expected:
         raise Exception('Error: expected:\n"' +
-                str(expected).replace('\n', '\\n\n') + '"\n but was:\n"' +
-                str(actual).replace('\n', '\\n\n') + '"\n')
+                        str(expected).replace('\n', '\\n\n') + '"\n but was:\n"' +
+                        str(actual).replace('\n', '\\n\n') + '"\n')
 
 def main():
-    print(datetime.now().replace(microsecond = 0).isoformat(' '), end = ' - ', flush = True)
+    print(datetime.now().replace(microsecond = 0).isoformat(' '), end = ' - ', flush=True)
     symbolsToPrice = getPrices(PORTFOLIO, PRICE_CURS, TOTAL_CURS, RATIOS, QUOTES)
     print(formatPrices(RATIOS, symbolsToPrice, formatRatio, MAX_PER_LINE, SIGNIF_DIGITS, COLUMNS_GAP))
     print(formatPrices(QUOTES.items(), symbolsToPrice, formatQuote, MAX_PER_LINE, SIGNIF_DIGITS, COLUMNS_GAP))
+    print()
     print(formatPortfolio(PORTFOLIO, symbolsToPrice, COLUMNS_GAP))
 
 ####################### TESTS #######################
@@ -510,7 +518,7 @@ def runTests():
                                2,
                                4,
                                '  '),
-                 'EUR/USD=1.200  GBP/EUR=0.780\nGBP/USD=12.20\n')
+                 'EUR/USD=1.200  GBP/EUR=0.780\nGBP/USD=12.20')
     assertEquals(formatCols(
         {'XAU': {'g': 8, 'ozt': 2},
          'XBT': Decimal('13.3'),
@@ -568,7 +576,7 @@ def runTests():
         "XBT  0.890  10.20  81.03  13.30           0.4     12    136  1'078     13    477\n" +
         "XAU  2.300  2.198  833.2  2.257  70.21    0.2      5      5  1'881    768      2\n" +
         "                                 -----  -----  -----  -----  -----  -----  -----\n" +
-        "                                 70.21  100.0  2'814  7'267  5'126  1'501  9'123\n")
+        "                                 70.21  100.0  2'814  7'267  5'126  1'501  9'123")
     assertEquals(computeColumn(('XBT', 'EUR', 'XAU'), lambda sym: sym + 'x', None),
             {'XBT': 'XBTx', 'EUR': 'EURx', 'XAU': 'XAUx'})
     assertEquals(computeColumn(('XBT', 'EUR', 'XAU'), lambda sym, unit: sym + 'x' + unit, ('u1', 'u2', 'u3')),
