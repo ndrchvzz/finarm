@@ -21,7 +21,7 @@ Oil=39.39  Gas=2.195  Corn=381.0  Oats=267.2  Cattle=119.0  Hogs=55.48
 Cotton=62.27  Coffee=117.8  Cocoa=3'328
 
 SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE  VALUE  VALUE  VALUE  VALUE  VALUE
-USD    EUR    GBP             g      %    USD    EUR    GBP    XBT    XAU
+       USD    EUR    GBP             g      %    USD    EUR    GBP    XBT    XAU
 
 XAU  1'048  967.6  703.4  1.997     62   68.7  2'093  1'932  1'404  4.610  1.997
 XAG  13.68  12.63  9.181  36.37  1'131   16.3    498    459    334  1.095  0.476
