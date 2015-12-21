@@ -25,7 +25,7 @@
 # If you find this program useful, you can donate to the
 # bitcoin address 12f1khXXGp6vW6NizjRdfTgZDGWJdrna8i
 
-#--------------------- USER EDITABLE VARIABLES -------------------------------
+########################### USER EDITABLE VARIABLES ############################
 
 # Quantities of currencies in the portfolio.
 # The metals defined by ISO 4217 are:
@@ -42,10 +42,10 @@ XAG_G = (1000 * 1 +
           100 * 1)
 
 PORTFOLIO = {
-'XAU': {'g': XAU_G, 'ozt': 1},
-'XAG': {'g': XAG_G, 'ozt': 1},
-'XBT': 1,
-'GBP': 1,
+    'XAU': {'g': XAU_G, 'ozt': 1},
+    'XAG': {'g': XAG_G, 'ozt': 1},
+    'XBT': 1,
+    'GBP': 1,
 }
 
 # Weight units for the metal quantities in the portfolio.
@@ -73,7 +73,7 @@ THOUSAND_SEPARATOR = "'"
 # Characters that separate the table columns.
 COLUMNS_GAP = '  '
 
-# Maximum quotes or ratios to display on a line
+# Maximum quotes or ratios to display on a line.
 MAX_PER_LINE = 6
 
 # Names to use for the columns labels.
@@ -101,66 +101,66 @@ def makeFuture(prefix, suffix, months=0):
         m = m % 12
     return prefix + monthCodes[m - 1] + str(y % 100) + suffix
 
-# Ratios to be displayed
+# Ratios to be displayed.
 RATIOS = (
-          ('XAU', 'XAG'),
-          ('XBT', 'XAU'),
-          ('XPT', 'USD'),
-          ('XPD', 'USD'),
-          ('EUR', 'USD'),
-          ('USD', 'CNY'),
-          ('GBP', 'EUR'),
-          ('GBP', 'USD'),
-          ('USD', 'JPY'),
-          ('USD', 'SEK'),
-         )
+    ('XAU', 'XAG'),
+    ('XBT', 'XAU'),
+    ('XPT', 'USD'),
+    ('XPD', 'USD'),
+    ('EUR', 'USD'),
+    ('USD', 'CNY'),
+    ('GBP', 'EUR'),
+    ('GBP', 'USD'),
+    ('USD', 'JPY'),
+    ('USD', 'SEK'),
+)
 
 from collections import OrderedDict
 
 # Quotes, mapped to more user-friendly names.
 QUOTES = OrderedDict([
-                ('GBTC',      'GBTC'),
-                ('^NYXBT',    'NYXBT'),
-                ('DX-Y.NYB',  'USDX'),
-                ('^FVX',      'USTNO5Y'),
-                ('^TNX',      'USTNO10Y'),
-                ('^TYX',      'USTNO30Y'),
-                ('^VIX',      'VIX'),
-                ('^SPG1200',  'S&P1200'),
-                ('^GSPC',     'S&P500'),
-                ('^IXIC',     'NASDAQ'),
-                ('^HSI',      'HSI'),
-                ('^N225',     'Nikkei225'),
-                ('^STOXX50E', 'ESTX50EUR'),
-                ('^GDAXI',    'DAX'),
-                ('^FTSE',     'FTSE100'),
-                ('^FCHI',     'CAC40'),
-                ('FTSEMIB.MI','MIB'),
-                ('FTSE.AT',   'ATHEX'),
-                ('AAPL',      'AAPL'),
-                ('GOOG',      'GOOG'),
-                ('MSFT',      'MSFT'),
-                ('AMZN',      'AMZN'),
-                ('FB',        'FB'),
-                ('FCAU',      'FCAU'),
-                (makeFuture('GC',  '.CMX'), 'Gold'),
-                (makeFuture('SI',  '.CMX'), 'Silver'),
-                (makeFuture('PL',  '.NYM'), 'Platinum'),
-                (makeFuture('PA',  '.NYM'), 'Palladium'),
-                (makeFuture('ALI', '.CMX'), 'Aluminum'),
-                (makeFuture('HG',  '.CMX'), 'Copper'),
-                (makeFuture('CL',  '.NYM'), 'Oil'),
-                (makeFuture('NG',  '.NYM'), 'Gas'),
-                (makeFuture('C',   '.CBT'), 'Corn'),
-                (makeFuture('O',   '.CBT'), 'Oats'),
-                (makeFuture('LC',  '.CME'), 'Cattle'),
-                (makeFuture('LH',  '.CME'), 'Hogs'),
-                (makeFuture('CT',  '.NYB'), 'Cotton'),
-                (makeFuture('KC',  '.NYB'), 'Coffee'),
-                (makeFuture('CC',  '.NYB'), 'Cocoa'),
-                ])
+    ('GBTC',      'GBTC'),
+    ('^NYXBT',    'NYXBT'),
+    ('DX-Y.NYB',  'USDX'),
+    ('^FVX',      'USTNO5Y'),
+    ('^TNX',      'USTNO10Y'),
+    ('^TYX',      'USTNO30Y'),
+    ('^VIX',      'VIX'),
+    ('^SPG1200',  'S&P1200'),
+    ('^GSPC',     'S&P500'),
+    ('^IXIC',     'NASDAQ'),
+    ('^HSI',      'HSI'),
+    ('^N225',     'Nikkei225'),
+    ('^STOXX50E', 'ESTX50EUR'),
+    ('^GDAXI',    'DAX'),
+    ('^FTSE',     'FTSE100'),
+    ('^FCHI',     'CAC40'),
+    ('FTSEMIB.MI','MIB'),
+    ('FTSE.AT',   'ATHEX'),
+    ('AAPL',      'AAPL'),
+    ('GOOG',      'GOOG'),
+    ('MSFT',      'MSFT'),
+    ('AMZN',      'AMZN'),
+    ('FB',        'FB'),
+    ('FCAU',      'FCAU'),
+    (makeFuture('GC',  '.CMX'), 'Gold'),
+    (makeFuture('SI',  '.CMX'), 'Silver'),
+    (makeFuture('PL',  '.NYM'), 'Platinum'),
+    (makeFuture('PA',  '.NYM'), 'Palladium'),
+    (makeFuture('ALI', '.CMX'), 'Aluminum'),
+    (makeFuture('HG',  '.CMX'), 'Copper'),
+    (makeFuture('CL',  '.NYM'), 'Oil'),
+    (makeFuture('NG',  '.NYM'), 'Gas'),
+    (makeFuture('C',   '.CBT'), 'Corn'),
+    (makeFuture('O',   '.CBT'), 'Oats'),
+    (makeFuture('LC',  '.CME'), 'Cattle'),
+    (makeFuture('LH',  '.CME'), 'Hogs'),
+    (makeFuture('CT',  '.NYB'), 'Cotton'),
+    (makeFuture('KC',  '.NYB'), 'Coffee'),
+    (makeFuture('CC',  '.NYB'), 'Cocoa'),
+])
 
-#--------------------- END OF USER EDITABLE VARIABLES ------------------------
+######################## END OF USER EDITABLE VARIABLES ########################
 
 # Symbols that represent metals.
 METALS = frozenset({'XAG', 'XAU', 'XPD', 'XPT'})
@@ -180,13 +180,13 @@ TRANS = str.maketrans(dict((() if FRACT_SEPARATOR    == '.'
 
 # An alternative name that will map to the name as used by Yahoo finance.
 ALIASES = {
-        'XBT': 'BTC'
-        }
+    'XBT': 'BTC'
+}
 
-#-------------------------------------------------------------------------------
+################################################################################
 
 import json, itertools
-from decimal import Decimal
+from decimal import Decimal as D
 from urllib.request import Request, urlopen
 from urllib.parse import urlencode
 
@@ -196,7 +196,7 @@ def first(coll):
 def second(coll):
     return coll[1]
 
-# Partitions a collection coll in slices of size n
+# Partitions a collection coll in slices of size n.
 def partition(coll, n):
     return tuple(coll[i:i+n] for i in range(0, len(coll), n))
 
@@ -209,9 +209,9 @@ def toGram(unit):
              'ozt':      '31.1034768'}
     if unit not in table:
         raise Exception('Invalid weight unit \'' + unit + '\'')
-    return Decimal(table[unit])
+    return D(table[unit])
 
-# Valid names are: mg g kg t ozt
+# Valid names are: mg g kg t ozt.
 def convertWeight(val, fromName, toName):
     fromNameLC = fromName.lower()
     toNameLC = toName.lower()
@@ -230,13 +230,13 @@ def retrieveData(url):
 # Returns the amount of symbol in the portfolio, to the given unit if it's a metal.
 def getPortfolioQuantity(portfolio, symbol, toUnit):
     if symbol not in portfolio:
-        return Decimal(0)
+        return D(0)
     vals = portfolio[symbol]
     if symbol in METALS:
-        return sum(convertWeight(Decimal(qty), unit, toUnit)
+        return sum(convertWeight(D(qty), unit, toUnit)
                    for unit, qty in vals.items())
     else:
-        return Decimal(vals)
+        return D(vals)
 
 # Returns the fractional digits required for a number n to have the given significant digits.
 def significantDigits(n, signif):
@@ -247,7 +247,7 @@ def significantDigits(n, signif):
 def formatFract(val, fractDigits):
     if val == 0:
         return ''
-    if isinstance(val, Decimal):
+    if isinstance(val, D):
         return ('{:' + (',' if THOUSAND_SEPARATOR
                 else '') + '.' + str(fractDigits) + 'f}').format(val).translate(TRANS)
     else:
@@ -268,7 +268,7 @@ def getYahooQuotes(ratios, quotes):
             'format': 'json'}
     text = retrieveData('https://query.yahooapis.com/v1/public/yql?' + urlencode(params))
     data = json.loads(text)['query']['results']['quote']
-    return {entry['Symbol']: Decimal(entry['LastTradePriceOnly'] if entry['LastTradePriceOnly'] else Decimal(0))
+    return {entry['Symbol']: D(entry['LastTradePriceOnly'] if entry['LastTradePriceOnly'] else D(0))
             for entry in data}
 
 # Returns the Yahoo symbol for a ratio of 2 symbols.
@@ -283,7 +283,7 @@ def getPrices(portfolio, priceCurs, totalCurs, ratios, quotes):
     prices = getYahooQuotes((ratio for ratio in ratiosNeeded
                                   if first(ratio) != second(ratio)),
                             tuple(quotes.keys()))
-    prices.update({makeYahooSymbolRatio(ratioNum, ratioDen): Decimal(1)
+    prices.update({makeYahooSymbolRatio(ratioNum, ratioDen): D(1)
                        for (ratioNum, ratioDen) in ratiosNeeded
                        if ratioNum == ratioDen})
     return prices
@@ -354,7 +354,7 @@ def formatCols(portfolio, symbolsToPrice):
                                 None)
     weightCols = computeColumn(symbols,
                                lambda sym, unit: getPortfolioQuantity(portfolio, sym, unit) if sym in METALS
-                                                 else Decimal(0),
+                                                 else D(0),
                                WEIGHT_UNITS)
     valueCols = computeColumn(symbols,
                               lambda sym, cur: convertPrice(quantityCol[sym], sym, cur, symbolsToPrice),
@@ -391,43 +391,47 @@ def formatPortfolio(portfolio, symbolsToPrice, gap):
            '\n'.join(gap.join(col[row] for col in cols)
                      for row in range(1, len(second(cols))))
 
+def formatAll(symbolsToPrice, portfolio, ratios, quotes):
+    return (formatPrices(ratios, symbolsToPrice, formatRatio, MAX_PER_LINE, SIGNIF_DIGITS, COLUMNS_GAP) + '\n'
+            + formatPrices(quotes.items(), symbolsToPrice, formatQuote, MAX_PER_LINE, SIGNIF_DIGITS, COLUMNS_GAP) + '\n'
+            + '\n'
+            + formatPortfolio(portfolio, symbolsToPrice, COLUMNS_GAP)
+           )
+
 def main():
     print(datetime.now().replace(microsecond = 0).isoformat(' '), end=' - ', flush=True)
     symbolsToPrice = getPrices(PORTFOLIO, PRICE_CURS, TOTAL_CURS, RATIOS, QUOTES)
-    print(formatPrices(RATIOS, symbolsToPrice, formatRatio, MAX_PER_LINE, SIGNIF_DIGITS, COLUMNS_GAP))
-    print(formatPrices(QUOTES.items(), symbolsToPrice, formatQuote, MAX_PER_LINE, SIGNIF_DIGITS, COLUMNS_GAP))
-    print()
-    print(formatPortfolio(PORTFOLIO, symbolsToPrice, COLUMNS_GAP))
+    print(formatAll(symbolsToPrice, PORTFOLIO, RATIOS, QUOTES))
 
-####################### TESTS #######################
+#################################### TESTS #####################################
 
 def assertEquals(actual, expected):
     if actual != expected:
-        raise Exception('Error: expected:\n"' +
-                        str(expected).replace('\n', '\\n\n') + '"\n but was:\n"' +
-                        str(actual).replace('\n', '\\n\n') + '"\n')
+        raise Exception('Error: expected:\n"' + str(expected).replace('\n', '\\n\n') + '"\n' +
+                        'but was:\n"' + str(actual).replace('\n', '\\n\n') + '"\n')
 
 def runTests():
     assertEquals(first((2, 8, 7)), 2)
     assertEquals(second([2, 8, 7]), 8)
     assertEquals(partition([2, 8, 7, 2, 3, 0, 9, 1, 8, 7, 10], 3),
                  ([2, 8, 7], [2, 3, 0], [9, 1, 8], [7, 10]))
-    assertEquals(toGram('mg'), Decimal('0.001'))
-    assertEquals(toGram('g'), Decimal('1'))
-    assertEquals(toGram('kg'), Decimal('1000'))
-    assertEquals(toGram('kg'), Decimal('1000'))
-    assertEquals(toGram('t'), Decimal('1000000'))
-    assertEquals(toGram('ozt'), Decimal('31.1034768'))
-    assertEquals(convertWeight(Decimal('2.3'), 'g', 'kg'), Decimal('0.0023'))
-    assertEquals(convertWeight(Decimal('2.38'), 'ozt', 'kg'), Decimal('0.074026274784'))
+    assertEquals(toGram('mg'), D('0.001'))
+    assertEquals(toGram('g'), D('1'))
+    assertEquals(toGram('kg'), D('1000'))
+    assertEquals(toGram('kg'), D('1000'))
+    assertEquals(toGram('t'), D('1000000'))
+    assertEquals(toGram('ozt'), D('31.1034768'))
+    assertEquals(convertWeight(D('2.3'), 'g', 'kg'), D('0.0023'))
+    assertEquals(convertWeight(D('2.38'), 'ozt', 'kg'), D('0.074026274784'))
+    assertEquals(convertWeight(D('2.38'), 'ozt', 'ozt'), D('2.38'))
     assertEquals(getPortfolioQuantity({'XBT': 23, 'XAU': {'g': 8, 'ozt': 2}}, 'XXX', 'ozt'),
-                 Decimal(0))
+                 D(0))
     assertEquals(getPortfolioQuantity({'XBT': 23, 'XAU': {'g': 8, 'ozt': 2}}, 'XBT', 'ozt'),
-                 Decimal(23))
+                 D(23))
     assertEquals(getPortfolioQuantity({'XBT': 23, 'XAU': {'g': 8, 'ozt': 2}}, 'XAU', 'ozt'),
-                 Decimal('2.257205972549023844176802768'))
+                 D('2.257205972549023844176802768'))
     assertEquals(getPortfolioQuantity({'XBT': 23, 'XAU': {'g': 8, 'ozt': 2}}, 'XAU', 'g'),
-                 Decimal('70.2069536'))
+                 D('70.2069536'))
     assertEquals(significantDigits(23.9, 4), 2)
     assertEquals(significantDigits(23.9, 6), 4)
     assertEquals(significantDigits(23, 6), 4)
@@ -435,14 +439,14 @@ def runTests():
     assertEquals(significantDigits(8123, 3), 0)
     assertEquals(significantDigits(8123, 6), 2)
     assertEquals(significantDigits(8123, 0), 0)
-    assertEquals(formatFract(Decimal('2.98'), 5), '2.98000')
-    assertEquals(formatFract(Decimal('2.26'), 1), '2.3')
-    assertEquals(formatFract(Decimal('2.25'), 1), '2.2')
-    assertEquals(formatFract(Decimal('2.95'), 0), '3')
-    assertEquals(formatFract(Decimal('23882.95'), 0), "23'883")
-    assertEquals(formatSignif(Decimal('2.8'), 3), '2.80')
-    assertEquals(formatSignif(Decimal('92.8'), 3), '92.8')
-    assertEquals(formatSignif(Decimal('3392.8'), 3), "3'393")
+    assertEquals(formatFract(D('2.98'), 5), '2.98000')
+    assertEquals(formatFract(D('2.26'), 1), '2.3')
+    assertEquals(formatFract(D('2.25'), 1), '2.2')
+    assertEquals(formatFract(D('2.95'), 0), '3')
+    assertEquals(formatFract(D('23882.95'), 0), "23'883")
+    assertEquals(formatSignif(D('2.8'), 3), '2.80')
+    assertEquals(formatSignif(D('92.8'), 3), '92.8')
+    assertEquals(formatSignif(D('3392.8'), 3), "3'393")
     assertEquals(makeYahooSymbolRatio('EUR', 'USD'), 'EURUSD=X')
     assertEquals(leftPad('abc', 5), '  abc')
     assertEquals(leftPad('abc', 3), 'abc')
@@ -451,26 +455,26 @@ def runTests():
     assertEquals(leftPad('', 3), '   ')
     assertEquals(
             formatColumn(('VALUE',),
-                         OrderedDict([('USD', {'XAU': Decimal('25258.00195184353152442430487'),
-                                       'XAG': Decimal('4507.029573556921456446309564'),
-                                       'XBT': Decimal('132440.0000'),
-                                       'GBP': Decimal('21468.3800')}),
-                                      ('EUR', {'XAU': Decimal('22977.48491554484481297602074'),
-                                       'XAG': Decimal('4100.099340106327920227876261'),
-                                       'XBT': Decimal('120482.2388'),
-                                       'GBP': Decimal('19529.8300')}),
-                                      ('GBP', {'XAU': Decimal('16648.10616873010158144121046'),
-                                       'XAG': Decimal('2970.691518040823011786257927'),
-                                       'XBT': Decimal('87294.1916'),
-                                       'GBP': Decimal('14150.0')}),
-                                      ('XBT', {'XAU': Decimal('58.73937536124193035551575379'),
-                                       'XAG': Decimal('10.47163231607856778249304914'),
-                                       'XBT': Decimal('308.0'),
-                                       'GBP': Decimal('49.5250')}),
-                                      ('XAU', {'XAU': Decimal('23.51550316715718417691491004'),
-                                       'XAG': Decimal('4.195157045882407589880755710'),
-                                       'XBT': Decimal('123.2924'),
-                                       'GBP': Decimal('19.8100')})]),
+                         OrderedDict([('USD', {'XAU': D('25258.00195184353152442430487'),
+                                       'XAG': D('4507.029573556921456446309564'),
+                                       'XBT': D('132440.0000'),
+                                       'GBP': D('21468.3800')}),
+                                      ('EUR', {'XAU': D('22977.48491554484481297602074'),
+                                       'XAG': D('4100.099340106327920227876261'),
+                                       'XBT': D('120482.2388'),
+                                       'GBP': D('19529.8300')}),
+                                      ('GBP', {'XAU': D('16648.10616873010158144121046'),
+                                       'XAG': D('2970.691518040823011786257927'),
+                                       'XBT': D('87294.1916'),
+                                       'GBP': D('14150.0')}),
+                                      ('XBT', {'XAU': D('58.73937536124193035551575379'),
+                                       'XAG': D('10.47163231607856778249304914'),
+                                       'XBT': D('308.0'),
+                                       'GBP': D('49.5250')}),
+                                      ('XAU', {'XAU': D('23.51550316715718417691491004'),
+                                       'XAG': D('4.195157045882407589880755710'),
+                                       'XBT': D('123.2924'),
+                                       'GBP': D('19.8100')})]),
                                       4,
                                       ('XBT', 'XAU', 'GBP', 'XAG')),
             ((('  VALUE', '    USD'), "132'440", " 25'258", " 21'468", "  4'507", '-------', "183'673"),
@@ -480,20 +484,20 @@ def runTests():
              (('VALUE', '  XAU'), '123.3', ' 23.5', ' 19.8', '  4.2', '-----', '170.8')))
     assertEquals(
             formatColumn(('VALUE', 'USD'),
-                         {'XAU': Decimal('25258.00195184353152442430487'),
-                          'XAG': Decimal('4507.029573556921456446309564'),
-                          'XBT': Decimal('132440.0000'),
-                          'GBP': Decimal('21468.3800')},
+                         {'XAU': D('25258.00195184353152442430487'),
+                          'XAG': D('4507.029573556921456446309564'),
+                          'XBT': D('132440.0000'),
+                          'GBP': D('21468.3800')},
                          4,
                          ('XBT', 'XAU', 'GBP', 'XAG')),
             (('  VALUE', '    USD'), "132'440", " 25'258", " 21'468", "  4'507", '-------', "183'673"))
-    assertEquals(convertPrice(23, 'EUR', 'GBP', {'EURGBP=X': Decimal('1.2')}), Decimal('27.6'))
-    assertEquals(formatRatio(('EUR', 'USD'), {'EURUSD=X': Decimal('1.2')}, 4), 'EUR/USD=1.200')
-    assertEquals(formatQuote(('^GSPC', 'S&P500'), {'^GSPC': Decimal('1.2')}, 4), 'S&P500=1.200')
+    assertEquals(convertPrice(23, 'EUR', 'GBP', {'EURGBP=X': D('1.2')}), D('27.6'))
+    assertEquals(formatRatio(('EUR', 'USD'), {'EURUSD=X': D('1.2')}, 4), 'EUR/USD=1.200')
+    assertEquals(formatQuote(('^GSPC', 'S&P500'), {'^GSPC': D('1.2')}, 4), 'S&P500=1.200')
     assertEquals(formatPrices((('EUR', 'USD'), ('GBP', 'EUR'), ('GBP', 'USD')),
-                               {'GBPEUR=X': Decimal('0.78'),
-                                'EURUSD=X': Decimal('1.2'),
-                                'GBPUSD=X': Decimal('12.2')},
+                               {'GBPEUR=X': D('0.78'),
+                                'EURUSD=X': D('1.2'),
+                                'GBPUSD=X': D('12.2')},
                                formatRatio,
                                2,
                                4,
@@ -507,23 +511,23 @@ def runTests():
                               ('u3', {'EUR': 'EURxu3', 'XAU': 'XAUxu3', 'XBT': 'XBTxu3'})]))
     assertEquals(
             formatCols({'XAU': {'g': 8, 'ozt': 2},
-                        'XBT': Decimal('13.3'),
-                        'GBP': Decimal('2168')},
-                       {'XAUUSD=X': Decimal('2.3'),
-                        'BTCUSD=X': Decimal('0.89'),
-                        'GBPUSD=X': Decimal('1.29'),
-                        'XAUEUR=X': Decimal('2.198'),
-                        'BTCEUR=X': Decimal('10.2'),
-                        'GBPEUR=X': Decimal('3.287'),
-                        'XAUGBP=X': Decimal('833.2'),
-                        'GBPGBP=X': Decimal('1.0'),
-                        'BTCGBP=X': Decimal('81.032'),
-                        'GBPBTC=X': Decimal('0.332'),
-                        'XAUBTC=X': Decimal('340.2'),
-                        'BTCBTC=X': Decimal('1'),
-                        'XAUXAU=X': Decimal('1'),
-                        'GBPXAU=X': Decimal('3.987'),
-                        'BTCXAU=X': Decimal('35.834')}),
+                        'XBT': D('13.3'),
+                        'GBP': D('2168')},
+                       {'XAUUSD=X': D('2.3'),
+                        'BTCUSD=X': D('0.89'),
+                        'GBPUSD=X': D('1.29'),
+                        'XAUEUR=X': D('2.198'),
+                        'BTCEUR=X': D('10.2'),
+                        'GBPEUR=X': D('3.287'),
+                        'XAUGBP=X': D('833.2'),
+                        'GBPGBP=X': D('1.0'),
+                        'BTCGBP=X': D('81.032'),
+                        'GBPBTC=X': D('0.332'),
+                        'XAUBTC=X': D('340.2'),
+                        'BTCBTC=X': D('1'),
+                        'XAUXAU=X': D('1'),
+                        'GBPXAU=X': D('3.987'),
+                        'BTCXAU=X': D('35.834')}),
             ((('SYM',), 'GBP', 'XBT', 'XAU', '   ', '   '),
              (('PRICE', '  USD'), '1.290', '0.890', '2.300', '     ', '     '),
              (('PRICE', '  EUR'), '3.287', '10.20', '2.198', '     ', '     '),
@@ -538,23 +542,23 @@ def runTests():
              (('VALUE', '  XAU'), "8'644", '  477', '    2', '-----', "9'123")))
     assertEquals(
             formatPortfolio({'XAU': {'g': 8, 'ozt': 2},
-                             'XBT': Decimal('13.3'),
-                             'GBP': Decimal('2168')},
-                            {'XAUUSD=X': Decimal('2.3'),
-                             'BTCUSD=X': Decimal('0.89'),
-                             'GBPUSD=X': Decimal('1.29'),
-                             'XAUEUR=X': Decimal('2.198'),
-                             'BTCEUR=X': Decimal('10.2'),
-                             'GBPEUR=X': Decimal('3.287'),
-                             'XAUGBP=X': Decimal('833.2'),
-                             'GBPGBP=X': Decimal('1.0'),
-                             'BTCGBP=X': Decimal('81.032'),
-                             'GBPBTC=X': Decimal('0.332'),
-                             'XAUBTC=X': Decimal('340.2'),
-                             'BTCBTC=X': Decimal('1'),
-                             'XAUXAU=X': Decimal('1'),
-                             'GBPXAU=X': Decimal('3.987'),
-                             'BTCXAU=X': Decimal('35.834')},
+                             'XBT': D('13.3'),
+                             'GBP': D('2168')},
+                            {'XAUUSD=X': D('2.3'),
+                             'BTCUSD=X': D('0.89'),
+                             'GBPUSD=X': D('1.29'),
+                             'XAUEUR=X': D('2.198'),
+                             'BTCEUR=X': D('10.2'),
+                             'GBPEUR=X': D('3.287'),
+                             'XAUGBP=X': D('833.2'),
+                             'GBPGBP=X': D('1.0'),
+                             'BTCGBP=X': D('81.032'),
+                             'GBPBTC=X': D('0.332'),
+                             'XAUBTC=X': D('340.2'),
+                             'BTCBTC=X': D('1'),
+                             'XAUXAU=X': D('1'),
+                             'GBPXAU=X': D('3.987'),
+                             'BTCXAU=X': D('35.834')},
                             '  '),
             "SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE  VALUE  VALUE  VALUE  VALUE  VALUE\n" +
             "       USD    EUR    GBP             g      %    USD    EUR    GBP    XBT    XAU\n" +
@@ -564,7 +568,47 @@ def runTests():
             "XAU  2.300  2.198  833.2  2.257  70.21    0.2      5      5  1'881    768      2\n" +
             "                                 -----  -----  -----  -----  -----  -----  -----\n" +
             "                                 70.21  100.0  2'814  7'267  5'126  1'501  9'123")
+    assertEquals(
+            formatAll({'XAUUSD=X': D('2.3'),
+                       'BTCUSD=X': D('0.89'),
+                       'GBPUSD=X': D('1.29'),
+                       'XAUEUR=X': D('2.198'),
+                       'BTCEUR=X': D('10.2'),
+                       'GBPEUR=X': D('3.287'),
+                       'XAUGBP=X': D('833.2'),
+                       'GBPGBP=X': D('1.0'),
+                       'BTCGBP=X': D('81.032'),
+                       'GBPBTC=X': D('0.332'),
+                       'XAUBTC=X': D('340.2'),
+                       'BTCBTC=X': D('1'),
+                       'XAUXAU=X': D('1'),
+                       'GBPXAU=X': D('3.987'),
+                       'BTCXAU=X': D('35.834'),
+                       'XAUXAG=X': D('83.2'),
+                       'XBTXAU=X': D('3.7'),
+                       'GBTC':     D('98.7'),
+                       '^NYXBT':   D('928.2'),
+                       'DX-Y.NYB': D('25.18')},
+                      {'XAU': {'g': 8, 'ozt': 2},
+                       'XBT': D('13.3'),
+                       'GBP': D('2168')},
+                      (('XAU', 'XAG'),
+                       ('XBT', 'XAU')),
+                      OrderedDict([('GBTC',     'GBTC'),
+                                   ('^NYXBT',   'NYXBT'),
+                                   ('DX-Y.NYB', 'USDX')])),
+            "XAU/XAG=83.20  XBT/XAU=35.83\n" +
+            "GBTC=98.70  NYXBT=928.2  USDX=25.18\n" +
+            "\n" +
+            "SYM  PRICE  PRICE  PRICE    QTY    WGT  VALUE  VALUE  VALUE  VALUE  VALUE  VALUE\n" +
+            "       USD    EUR    GBP             g      %    USD    EUR    GBP    XBT    XAU\n" +
+            "\n" +
+            "GBP  1.290  3.287  1.000  2'168          99.4  2'797  7'126  2'168    720  8'644\n" +
+            "XBT  0.890  10.20  81.03  13.30           0.4     12    136  1'078     13    477\n" +
+            "XAU  2.300  2.198  833.2  2.257  70.21    0.2      5      5  1'881    768      2\n" +
+            "                                 -----  -----  -----  -----  -----  -----  -----\n" +
+            "                                 70.21  100.0  2'814  7'267  5'126  1'501  9'123")
 
-# Execution starting point
+######### EXECUTION STARTING POINT #########
 runTests()
 main ()
