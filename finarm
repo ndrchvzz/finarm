@@ -112,66 +112,70 @@ from collections import OrderedDict
 
 # Quotes, mapped to more user-friendly names.
 QUOTES = OrderedDict((
-    ('DX-Y.NYB',  'USDX'),
-    ('^IRX',      'USTNO13W'),
-    ('^FVX',      'USTNO5Y'),
-    ('^TNX',      'USTNO10Y'),
-    ('^TYX',      'USTNO30Y'),
-    ('GBTC',      'GBTC'),
-    ('^NYXBT',    'NYXBT'),
-    ('^VIX',      'VIX'),
-    ('^SPG1200',  'S&P1200'),
-    ('^GSPC',     'S&P500'),
-    ('^IXIC',     'NASDAQ'),
-    ('^HSI',      'HSI'),
-    ('^N225',     'Nikkei225'),
-    ('^STOXX50E', 'ESTX50EUR'),
-    ('^GDAXI',    'DAX'),
-    ('^FTSE',     'FTSE100'),
-    ('^FCHI',     'CAC40'),
-    ('FTSEMIB.MI','MIB'),
-    ('FTSE.AT',   'ATHEX'),
-    ('AAPL',      'AAPL'),
-    ('GOOG',      'GOOG'),
-    ('MSFT',      'MSFT'),
-    ('AMZN',      'AMZN'),
-    ('FB',        'FB'),
-    ('FCAU',      'FCAU'),
-    ('^XAU',      'Miners'),
-    ('^SPGSCI',   'SP-CI'),
+    ('DX-Y.NYB',   'USDX'),
+    ('^IRX',       'USTNO13W'),
+    ('^FVX',       'USTNO5Y'),
+    ('^TNX',       'USTNO10Y'),
+    ('^TYX',       'USTNO30Y'),
+    ('GBTC',       'GBTC'),
+    ('^NYXBT',     'NYXBT'),
+    ('^VIX',       'VIX'),
+    ('^SPG1200',   'S&P1200'),
+    ('^GSPC',      'S&P500'),
+    ('^IXIC',      'NASDAQ'),
+    ('^HSI',       'HSI'),
+    ('^N225',      'Nikkei225'),
+    ('^STOXX50E',  'ESTX50EUR'),
+    ('^GDAXI',     'DAX'),
+    ('^FTSE',      'FTSE100'),
+    ('^FCHI',      'CAC40'),
+    ('FTSEMIB.MI', 'MIB'),
+    ('FTSE.AT',    'ATHEX'),
+    ('AAPL',       'AAPL'),
+    ('GOOG',       'GOOG'),
+    ('MSFT',       'MSFT'),
+    ('AMZN',       'AMZN'),
+    ('FB',         'FB'),
+    ('FCAU',       'FCAU'),
+    ('^XAU',       'Miners'),
+    ('^SPGSCI',    'SP-CI'),
 ))
 
+# The format is ((prefix, suffix, months), alias).
+# The "months" parameter is optional and specifies the months of the year when
+# the future is available. If not specified, it means all months.
+# The letters for the 12 months are, in the order, FGHJKMNQUVXZ.
 FUTURES = OrderedDict((
-    (('GI',  '.CME'), 'GS-CI'),
-    (('CL',  '.NYM'), 'Oil'),
-    (('NG',  '.NYM'), 'Gas'),
-    (('GC',  '.CMX'), 'Gold'),
-    (('SI',  '.CMX'), 'Silver'),
-    (('PL',  '.NYM'), 'Platinum'),
-    (('PA',  '.NYM'), 'Palladium'),
-    (('ALI', '.CMX'), 'Aluminum'),
-    (('HG',  '.CMX'), 'Copper'),
-    (('C',   '.CBT', 'HKNUZ'), 'Corn'),
-    (('O',   '.CBT', 'HKNUZ'), 'Oats'),
-    (('RR',   '.CBT', 'FHKNUX'), 'Rice'),
-    (('SM',   '.CBT', 'FHKNQUVZ'), 'SoyM'),
-    (('BO',   '.CBT', 'FHKNQUVZ'), 'SoyO'),
-    (('S',   '.CBT', 'FHKNQUX'), 'Soy'),
-    (('LC',  '.CME', 'GJMQVZ'), 'L.Cattle'),
+    (('GI',  '.CME'),             'GS-CI'),
+    (('CL',  '.NYM'),             'Oil'),
+    (('NG',  '.NYM'),             'Gas'),
+    (('GC',  '.CMX'),             'Gold'),
+    (('SI',  '.CMX'),             'Silver'),
+    (('PL',  '.NYM'),             'Platinum'),
+    (('PA',  '.NYM'),             'Palladium'),
+    (('ALI', '.CMX'),             'Aluminum'),
+    (('HG',  '.CMX'),             'Copper'),
+    (('C',   '.CBT', 'HKNUZ'),    'Corn'),
+    (('O',   '.CBT', 'HKNUZ'),    'Oats'),
+    (('RR',  '.CBT', 'FHKNUX'),   'Rice'),
+    (('SM',  '.CBT', 'FHKNQUVZ'), 'SoyM'),
+    (('BO',  '.CBT', 'FHKNQUVZ'), 'SoyO'),
+    (('S',   '.CBT', 'FHKNQUX'),  'Soy'),
+    (('LC',  '.CME', 'GJMQVZ'),   'L.Cattle'),
     (('FC',  '.CME', 'FHJKQUVX'), 'F.Cattle'),
     (('LH',  '.CME', 'GJKMNQVZ'), 'Hogs'),
-    (('CT',  '.NYB', 'HKNVZ'), 'Cotton'),
-    (('KC',  '.NYB', 'HKNUZ'), 'Coffee'),
-    (('CC',  '.NYB', 'HKNUZ'), 'Cocoa'),
-    (('LB',  '.CME', 'FHKNUX'), 'Lumber'),
-    (('OJ',  '.NYB', 'FHKNUX'), 'OJ'),
-    (('SB',  '.NYB', 'HKNV'), 'Sugar'),
+    (('CT',  '.NYB', 'HKNVZ'),    'Cotton'),
+    (('KC',  '.NYB', 'HKNUZ'),    'Coffee'),
+    (('CC',  '.NYB', 'HKNUZ'),    'Cocoa'),
+    (('LB',  '.CME', 'FHKNUX'),   'Lumber'),
+    (('OJ',  '.NYB', 'FHKNUX'),   'OJ'),
+    (('SB',  '.NYB', 'HKNV'),     'Sugar'),
 ))
 
 ######################## END OF USER EDITABLE VARIABLES ########################
 
 # Symbols that represent metals.
-METALS = frozenset({'XAG', 'XAU', 'XPD', 'XPT'})
+METALS = frozenset(('XAG', 'XAU', 'XPD', 'XPT'))
 
 # Weight unit for the prices given by the echanges.
 PRICE_WEIGHT_UNIT = 'ozt'
@@ -214,15 +218,14 @@ def toGram(unit):
 def convertWeight(val, fromName, toName):
     fromNameLC = fromName.lower()
     toNameLC = toName.lower()
-    return val if fromNameLC == toNameLC \
-           else val * toGram(fromNameLC) / toGram(toNameLC)
+    return val * (toGram(fromNameLC) / toGram(toNameLC))
 
 # The only function that exchanges data with the net.
 def retrieveData(url):
     print(str(len(url)), end=' B sent', flush=True)
     response = urlopen(Request(url,
                                headers = {'User-Agent': 'https://github.com/andrea-chiavazza/finarm'}))
-    data = str(response.read(), encoding = 'utf8')
+    data = str(response.read(), encoding = 'utf-8')
     print(' / ' + str(len(data)) + ' B received')
     return data
 
@@ -293,9 +296,8 @@ def formatColumn(title, data, signif, sortedSymbols, columns_with_total, line_ch
     titles = tuple(title.split())
     if titles[0] in columns_with_total:
         tot = sum(data.values())
-        fract = min(tuple(significantDigits(data[sym], signif)
-                          for sym in sortedSymbols)
-                    + (significantDigits(tot, signif),))
+        fract = min(significantDigits(n, signif)
+                    for n in (tuple(data[sym] for sym in sortedSymbols) + (tot,)))
         rows = tuple(formatFract(data[sym], fract, trans)
                      for sym in sortedSymbols)
         totSep = line_char
@@ -309,7 +311,7 @@ def formatColumn(title, data, signif, sortedSymbols, columns_with_total, line_ch
     maxsep = max(len(s) for s in rows + (totStr,))
     maxl = max((maxsep,) + tuple(len(s) for s in titles))
     return (tuple(s.rjust(maxl) for s in titles),) + \
-           tuple(s.rjust(maxl) for s in rows + (totSep * maxsep,) + (totStr,))
+           tuple(s.rjust(maxl) for s in rows + (totSep * maxsep, totStr))
 
 # Returns a tuple of columns, where columns are tuples of strings.
 # data can be {sym: D} or {cur: {sym: D}}
@@ -379,7 +381,7 @@ def formatCols(portfolio, symbolsToPrice, prefs):
         return D(100) * getValue(sym, shareCur) / shareCurTot;
 
     sortedSymbols = tuple(sorted(symbols,
-                                 key = lambda sym: getShare(sym),
+                                 key = getShare,
                                  reverse = prefs.display_highest_to_lowest))
 
     cols = ((prefs.symbol_label,   None,               lambda sym: sym),
@@ -427,12 +429,12 @@ from collections import namedtuple
 from datetime import datetime
 
 Prefs = namedtuple('Prefs',
-                   ['weight_units', 'price_curs', 'total_curs', 'columns_with_total',
+                   ('weight_units', 'price_curs', 'total_curs', 'columns_with_total',
                     'display_highest_to_lowest', 'signif_digits', 'fract_separator',
                     'thousand_separator', 'columns_gap', 'max_per_line',
                     'symbol_label', 'quantity_label', 'share_label', 'price_label',
                     'value_label', 'weight_label', 'aliases', 'price_weight_unit',
-                    'line_char', 'trans', 'metals'])
+                    'line_char', 'trans', 'metals'))
 
 # Makes the Yahoo symbol of a future.
 def makeFuture(prefix, suffix, y, m, months):
@@ -450,7 +452,7 @@ def makeFuture(prefix, suffix, y, m, months):
 
 def makeFuturesQuotes(futures, y, m):
     return OrderedDict((makeFuture(k[0], k[1], y, m, k[2] if len(k) > 2 else None), futures[k])
-                        for k in futures)
+                       for k in futures)
 
 def makeNextFuturesQuotes(futures):
     now = datetime.now()
@@ -489,8 +491,8 @@ def runTests():
     weight_label = 'WEIGHT'
     value_label = 'VALUE'
     tprefs = Prefs(weight_units = ('g', 'kg'),
-                   price_curs = ('USD', 'EUR', 'GBP', ),
-                   total_curs = ('USD', 'EUR', 'XBT', ),
+                   price_curs = ('USD', 'EUR', 'GBP'),
+                   total_curs = ('USD', 'EUR', 'XBT'),
                    columns_with_total = (weight_label, value_label),
                    display_highest_to_lowest = True,
                    signif_digits = 4,
@@ -508,7 +510,7 @@ def runTests():
                    price_weight_unit = 'ozt',
                    line_char = '-',
                    trans = str.maketrans({',': "'"}),
-                   metals = frozenset({'XAG', 'XAU', 'XPD', 'XPT'}))
+                   metals = frozenset(('XAG', 'XAU', 'XPD', 'XPT')))
 
     prices = {'BTCUSD=X': D('418.9100'),
               'GBPBTC=X': D('0.0035'),
@@ -569,6 +571,9 @@ def runTests():
                  OrderedDict((('CK16.CBT', 'Corn'),
                               ('SMK16.CBT', 'SoyM'),
                               ('HGJ16.CMX', 'Copper'))))
+    assertEquals(partition((2, 8, 7, 2, 3, 0, 9, 1, 8, 7, 10),
+                           3),
+                 ((2, 8, 7), (2, 3, 0), (9, 1, 8), (7, 10)))
     assertEquals(partition([2, 8, 7, 2, 3, 0, 9, 1, 8, 7, 10],
                            3),
                  ([2, 8, 7], [2, 3, 0], [9, 1, 8], [7, 10]))
@@ -631,7 +636,7 @@ def runTests():
         (('  VALUE', '    USD'), "132'440", " 25'258", " 21'468", "  4'507", '-------', "183'673"))
     assertEquals(
         formatColumns('VALUE',
-                      OrderedDict([('USD', {'XAU': D('25258.00195184353152442430487'),
+                      OrderedDict((('USD', {'XAU': D('25258.00195184353152442430487'),
                                     'XAG': D('4507.029573556921456446309564'),
                                     'XBT': D('132440.0000'),
                                     'GBP': D('21468.3800')}),
@@ -650,7 +655,7 @@ def runTests():
                                    ('XAU', {'XAU': D('23.51550316715718417691491004'),
                                     'XAG': D('4.195157045882407589880755710'),
                                     'XBT': D('123.2924'),
-                                    'GBP': D('19.8100')})]),
+                                    'GBP': D('19.8100')}))),
                       tprefs.signif_digits,
                       ('XBT', 'XAU', 'GBP', 'XAG'),
                       tprefs.columns_with_total,
@@ -709,9 +714,9 @@ def runTests():
         computeColumn(('XBT', 'EUR', 'XAU'),
                       lambda sym, unit: sym + 'x' + unit,
                       ('u1', 'u2', 'u3')),
-        OrderedDict([('u1', {'EUR': 'EURxu1', 'XAU': 'XAUxu1', 'XBT': 'XBTxu1'}),
+        OrderedDict((('u1', {'EUR': 'EURxu1', 'XAU': 'XAUxu1', 'XBT': 'XBTxu1'}),
                      ('u2', {'EUR': 'EURxu2', 'XAU': 'XAUxu2', 'XBT': 'XBTxu2'}),
-                     ('u3', {'EUR': 'EURxu3', 'XAU': 'XAUxu3', 'XBT': 'XBTxu3'})]))
+                     ('u3', {'EUR': 'EURxu3', 'XAU': 'XAUxu3', 'XBT': 'XBTxu3'}))))
     assertEquals(
         formatCols(portfolio, prices, tprefs),
         ((('SYM',), 'XBT', 'GBP', 'XAU', 'XAG', '   ', '   '),
