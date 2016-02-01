@@ -58,7 +58,8 @@ WEIGHT_UNITS = ('g', )
 PRICE_CURS = ('USD', 'EUR', 'GBP', )
 
 # Which currencies to use to compute the total value of the portfolio.
-TOTAL_CURS = ('USD', 'EUR', 'GBP', 'XBT', 'XAU', )
+# '%' will print the percentages of the assets computed using the first currency in the list.
+TOTAL_CURS = ('%', 'USD', 'EUR', 'GBP', 'XBT', 'XAU', )
 
 # Whether to display the currencies from highest to lowest of their value in the portfolio.
 DISPLAY_HIGHEST_TO_LOWEST = True
@@ -81,7 +82,6 @@ MAX_PER_LINE = 6
 # Names to use for the columns labels.
 SYMBOL_LABEL = 'SYM'
 QUANTITY_LABEL = 'QTY'
-SHARE_LABEL = 'VALUE\n%'
 PRICE_LABEL = 'PRICE'
 VALUE_LABEL = 'VALUE'
 WEIGHT_LABEL = 'WEIGHT'
@@ -146,6 +146,7 @@ QUOTES = OrderedDict((
 # the future is available. If not specified, it means all months.
 # The letters for the 12 months are, in the order, FGHJKMNQUVXZ.
 FUTURES = OrderedDict((
+    (('ES',  '.CME', 'HMUZ'),     'S&PFut'),
     (('GI',  '.CME'),             'GS-CI'),
     (('CL',  '.NYM'),             'Oil'),
     (('NG',  '.NYM'),             'Gas'),
@@ -242,7 +243,7 @@ def getPortfolioQuantity(portfolio, symbol, toUnit, metals):
 
 # Returns the fractional digits required for a number n to have the given significant digits.
 def significantDigits(n, signif):
-    intlength = len(str(round(abs(n))))
+    intlength = len(str(int(abs(n))))
     return (signif - intlength) if signif > intlength else 0
 
 # Formats a Decimal with the given fractional digits.
@@ -294,19 +295,30 @@ def getPrices(portfolio, priceCurs, totalCurs, ratios, quotes, aliases):
 # data must be {sym: D}
 def formatColumn(title, data, signif, sortedSymbols, columns_with_total, line_char, trans):
     titles = tuple(title.split())
-    if titles[0] in columns_with_total:
-        tot = sum(data.values())
+    isPct = len(titles) > 1 and titles[1] == '%'
+    hasTot = titles[0] in columns_with_total
+    if isPct:
+        tot = D(100)
+        rowsData = {k: tot * data[k] / sum(data.values())
+                    for k in data}
+    else:
+        if hasTot:
+            tot = sum(data.values())
+        rowsData = data
+    if isPct or hasTot:
         fract = min(significantDigits(n, signif)
-                    for n in (tuple(data[sym] for sym in sortedSymbols) + (tot,)))
-        rows = tuple(formatFract(data[sym], fract, trans)
+                    for n in (tuple(rowsData[sym] for sym in sortedSymbols) + (tot,)))
+        rows = tuple(formatFract(rowsData[sym], fract, trans)
                      for sym in sortedSymbols)
+    else:
+        rows = tuple(formatSignif(rowsData[sym], signif, trans)
+                     if isinstance(rowsData[sym], D) else rowsData[sym]
+                     for sym in sortedSymbols)
+    if hasTot:
         totSep = line_char
         totStr = formatFract(tot, fract, trans)
     else:
-        rows = tuple(formatSignif(data[sym], signif, trans)
-                     if isinstance(data[sym], D) else data[sym]
-                     for sym in sortedSymbols)
-        totSep = ' '
+        totSep = ''
         totStr = ''
     maxsep = max(len(s) for s in rows + (totStr,))
     maxl = max((maxsep,) + tuple(len(s) for s in titles))
@@ -350,7 +362,13 @@ def computeColumn(symbols, func, units):
     if units is None:
         return {sym: func(sym) for sym in symbols}
     else:
-        return OrderedDict((unit, {sym: func(sym, unit) for sym in symbols})
+        if '%' in units:
+            nonPctUnits = tuple(filter(lambda x: x != '%', units))
+            if not nonPctUnits:
+                raise Exception('Percentage can\'t be the only unit')
+            shareUnit = nonPctUnits[0]
+        return OrderedDict((unit, {sym: func(sym, shareUnit if unit == '%' else unit)
+                                   for sym in symbols})
                            for unit in units)
 
 def formatCols(portfolio, symbolsToPrice, prefs):
@@ -373,32 +391,32 @@ def formatCols(portfolio, symbolsToPrice, prefs):
     def getValue(sym, cur):
         return convertPrice(getQty(sym), sym, cur, symbolsToPrice, prefs.aliases)
 
-    shareCur = prefs.total_curs[0]
-    shareCurTot = sum(getValue(sym, shareCur) for sym in symbols)
-
-    @lru_cache()
-    def getShare(sym):
-        return D(100) * getValue(sym, shareCur) / shareCurTot;
-
-    sortedSymbols = tuple(sorted(symbols,
-                                 key = getShare,
-                                 reverse = prefs.display_highest_to_lowest))
-
     cols = ((prefs.symbol_label,   None,               lambda sym: sym),
             (prefs.price_label,    prefs.price_curs,   getPrice),
             (prefs.quantity_label, None,               getQty),
             (prefs.weight_label,   prefs.weight_units, getWgt),
-            (prefs.share_label,    None,               getShare),
             (prefs.value_label,    prefs.total_curs,   getValue))
 
-    fcols = (formatColumns(col[0],
-                           computeColumn(symbols, col[2], col[1]),
+    vcols = OrderedDict((col[0], computeColumn(symbols, col[2], col[1]))
+                        for col in cols)
+
+    if '%' in vcols[prefs.value_label]:
+        sortCur = '%'
+    else:
+        sortCur = next(iter(vcols[prefs.value_label].keys()))
+
+    sortedSymbols = tuple(sorted(symbols,
+                                 key = lambda sym: vcols[prefs.value_label][sortCur][sym],
+                                 reverse = prefs.display_highest_to_lowest))
+
+    fcols = (formatColumns(col,
+                           vcols[col],
                            prefs.signif_digits,
                            sortedSymbols,
                            prefs.columns_with_total,
                            prefs.line_char,
                            prefs.trans)
-             for col in cols)
+             for col in vcols)
     return reduce(lambda res, fcol: res + fcol, fcols)
 
 def formatPortfolio(portfolio, symbolsToPrice, prefs):
@@ -432,7 +450,7 @@ Prefs = namedtuple('Prefs',
                    ('weight_units', 'price_curs', 'total_curs', 'columns_with_total',
                     'display_highest_to_lowest', 'signif_digits', 'fract_separator',
                     'thousand_separator', 'columns_gap', 'max_per_line',
-                    'symbol_label', 'quantity_label', 'share_label', 'price_label',
+                    'symbol_label', 'quantity_label', 'price_label',
                     'value_label', 'weight_label', 'aliases', 'price_weight_unit',
                     'line_char', 'trans', 'metals'))
 
@@ -461,7 +479,7 @@ def makeNextFuturesQuotes(futures):
 def main():
     prefs = Prefs(WEIGHT_UNITS, PRICE_CURS, TOTAL_CURS, COLUMNS_WITH_TOTAL, DISPLAY_HIGHEST_TO_LOWEST,
                   SIGNIF_DIGITS, FRACT_SEPARATOR, THOUSAND_SEPARATOR, COLUMNS_GAP,
-                  MAX_PER_LINE, SYMBOL_LABEL, QUANTITY_LABEL, SHARE_LABEL, PRICE_LABEL,
+                  MAX_PER_LINE, SYMBOL_LABEL, QUANTITY_LABEL, PRICE_LABEL,
                   VALUE_LABEL, WEIGHT_LABEL, ALIASES, PRICE_WEIGHT_UNIT, LINE_CHAR, TRANS, METALS)
     print(datetime.now().replace(microsecond = 0).isoformat(' '), end=' - ', flush=True)
     if '-q' in sys.argv:
@@ -492,7 +510,7 @@ def runTests():
     value_label = 'VALUE'
     tprefs = Prefs(weight_units = ('g', 'kg'),
                    price_curs = ('USD', 'EUR', 'GBP'),
-                   total_curs = ('USD', 'EUR', 'XBT'),
+                   total_curs = ('%', 'USD', 'EUR', 'XBT'),
                    columns_with_total = (weight_label, value_label),
                    display_highest_to_lowest = True,
                    signif_digits = 4,
@@ -502,7 +520,6 @@ def runTests():
                    max_per_line = 2,
                    symbol_label = 'SYM',
                    quantity_label = 'QTY',
-                   share_label = 'VALUE\n%',
                    price_label = 'PRICE',
                    value_label = value_label,
                    weight_label = weight_label,
@@ -612,6 +629,9 @@ def runTests():
     assertEquals(significantDigits(8123, 3), 0)
     assertEquals(significantDigits(8123, 6), 2)
     assertEquals(significantDigits(8123, 0), 0)
+    assertEquals(significantDigits(99.98, 3), 1)
+    assertEquals(significantDigits(99.98, 4), 2)
+    assertEquals(significantDigits(9.8997, 4), 3)
     assertEquals(formatFract(D('2.98'), 5, tprefs.trans), '2.98000')
     assertEquals(formatFract(D('2.26'), 1, tprefs.trans), '2.3')
     assertEquals(formatFract(D('2.25'), 1, tprefs.trans), '2.2')
@@ -637,25 +657,25 @@ def runTests():
     assertEquals(
         formatColumns('VALUE',
                       OrderedDict((('USD', {'XAU': D('25258.00195184353152442430487'),
-                                    'XAG': D('4507.029573556921456446309564'),
-                                    'XBT': D('132440.0000'),
-                                    'GBP': D('21468.3800')}),
+                                            'XAG': D('4507.029573556921456446309564'),
+                                            'XBT': D('132440.0000'),
+                                            'GBP': D('21468.3800')}),
                                    ('EUR', {'XAU': D('22977.48491554484481297602074'),
-                                    'XAG': D('4100.099340106327920227876261'),
-                                    'XBT': D('120482.2388'),
-                                    'GBP': D('19529.8300')}),
+                                            'XAG': D('4100.099340106327920227876261'),
+                                            'XBT': D('120482.2388'),
+                                            'GBP': D('19529.8300')}),
                                    ('GBP', {'XAU': D('16648.10616873010158144121046'),
-                                    'XAG': D('2970.691518040823011786257927'),
-                                    'XBT': D('87294.1916'),
-                                    'GBP': D('14150.0')}),
+                                            'XAG': D('2970.691518040823011786257927'),
+                                            'XBT': D('87294.1916'),
+                                            'GBP': D('14150.0')}),
                                    ('XBT', {'XAU': D('58.73937536124193035551575379'),
-                                    'XAG': D('10.47163231607856778249304914'),
-                                    'XBT': D('308.0'),
-                                    'GBP': D('49.5250')}),
+                                            'XAG': D('10.47163231607856778249304914'),
+                                            'XBT': D('308.0'),
+                                            'GBP': D('49.5250')}),
                                    ('XAU', {'XAU': D('23.51550316715718417691491004'),
-                                    'XAG': D('4.195157045882407589880755710'),
-                                    'XBT': D('123.2924'),
-                                    'GBP': D('19.8100')}))),
+                                            'XAG': D('4.195157045882407589880755710'),
+                                            'XBT': D('123.2924'),
+                                            'GBP': D('19.8100')}))),
                       tprefs.signif_digits,
                       ('XBT', 'XAU', 'GBP', 'XAG'),
                       tprefs.columns_with_total,
@@ -666,6 +686,50 @@ def runTests():
          (('  VALUE', '    GBP'), " 87'294", " 16'648", " 14'150", "  2'971", '-------', "121'063"),
          (('VALUE', '  XBT'), '308.0', ' 58.7', ' 49.5', ' 10.5', '-----', '426.7'),
          (('VALUE', '  XAU'), '123.3', ' 23.5', ' 19.8', '  4.2', '-----', '170.8')))
+    assertEquals(
+        formatColumns('VALUE',
+                      OrderedDict((('USD', {'XAU': D('25258.00195184353152442430487'),
+                                            'XAG': D('4507.029573556921456446309564'),
+                                            'XBT': D('132440.0000'),
+                                            'GBP': D('21468.3800')}),
+                                   ('%',   {'XAU': D('25258.00195184353152442430487'),
+                                            'XAG': D('4507.029573556921456446309564'),
+                                            'XBT': D('132440.0000'),
+                                            'GBP': D('21468.3800')}),
+                                   ('EUR', {'XAU': D('22977.48491554484481297602074'),
+                                            'XAG': D('4100.099340106327920227876261'),
+                                            'XBT': D('120482.2388'),
+                                            'GBP': D('19529.8300')}))),
+                      tprefs.signif_digits,
+                      ('XBT', 'XAU', 'GBP', 'XAG'),
+                      tprefs.columns_with_total,
+                      tprefs.line_char,
+                      tprefs.trans),
+        ((('  VALUE', '    USD'), "132'440", " 25'258", " 21'468", "  4'507", '-------', "183'673"),
+         (('VALUE', '    %'), " 72.1", " 13.8", " 11.7", "  2.5", '-----', "100.0"),
+         (('  VALUE', '    EUR'), "120'482", " 22'977", " 19'530", "  4'100", '-------', "167'090")))
+    assertEquals(
+        formatColumns('VALUE',
+                      OrderedDict((('USD', {'XAU': D('25258.00195184353152442430487'),
+                                            'XAG': D('4507.029573556921456446309564'),
+                                            'XBT': D('132440.0000'),
+                                            'GBP': D('21468.3800')}),
+                                   ('%',   {'XAU': D('25258.00195184353152442430487'),
+                                            'XAG': D('4507.029573556921456446309564'),
+                                            'XBT': D('132440.0000'),
+                                            'GBP': D('21468.3800')}),
+                                   ('EUR', {'XAU': D('22977.48491554484481297602074'),
+                                            'XAG': D('4100.099340106327920227876261'),
+                                            'XBT': D('120482.2388'),
+                                            'GBP': D('19529.8300')}))),
+                      tprefs.signif_digits,
+                      ('XBT', 'XAU', 'GBP', 'XAG'),
+                      (),
+                      tprefs.line_char,
+                      tprefs.trans),
+        ((('  VALUE', '    USD'), "132'440", " 25'258", " 21'468", "  4'507", '       ', '       '),
+         (('VALUE', '    %'), " 72.1", " 13.8", " 11.7", "  2.5", '     ', '     '),
+         (('  VALUE', '    EUR'), "120'482", " 22'977", " 19'530", "  4'100", '       ', '       ')))
     assertEquals(
         formatColumns('VALUE',
                       {},
@@ -722,7 +786,7 @@ def runTests():
         ((('SYM',), 'XBT', 'GBP', 'XAU', 'XAG', '   ', '   '),
          (('PRICE', '  USD'), '418.9', '1.484', "1'076", '14.37', '     ', '     '),
          (('PRICE', '  EUR'), '381.7', '1.352', '980.4', '13.09', '     ', '     '),
-         (('PRICE', '  GBP'), '282.3', '1.000', '725.3', ' 9.68', '     ', '     '),
+         (('PRICE', '  GBP'), '282.3', '1.000', '725.3', '9.685', '     ', '     '),
          (('  QTY',), '13.30', "2'168", '2.900', '107.3', '     ', '     '),
          (('WEIGHT', '     g'), '      ', '      ', '    90', " 3'337", ' -----', " 3'428"),
          (('WEIGHT', '    kg'), '      ', '      ', ' 0.090', ' 3.337', ' -----', ' 3.428'),
@@ -738,7 +802,7 @@ def runTests():
         "XBT  418.9  381.7  282.3  13.30                   41.4   5'572   5'076  13.30\n" +
         "GBP  1.484  1.352  1.000  2'168                   23.9   3'217   2'931   7.59\n" +
         "XAU  1'076  980.4  725.3  2.900      90   0.090   23.2   3'121   2'843   7.45\n" +
-        "XAG  14.37  13.09   9.68  107.3   3'337   3.337   11.5   1'542   1'405   3.68\n" +
+        "XAG  14.37  13.09  9.685  107.3   3'337   3.337   11.5   1'542   1'405   3.68\n" +
         "                                  -----   -----  -----  ------  ------  -----\n" +
         "                                  3'428   3.428  100.0  13'451  12'255  32.02\n")
     assertEquals(
@@ -752,7 +816,7 @@ def runTests():
         "XBT  418.9  381.7  282.3  13.30                   41.4   5'572   5'076  13.30\n" +
         "GBP  1.484  1.352  1.000  2'168                   23.9   3'217   2'931   7.59\n" +
         "XAU  1'076  980.4  725.3  2.900      90   0.090   23.2   3'121   2'843   7.45\n" +
-        "XAG  14.37  13.09   9.68  107.3   3'337   3.337   11.5   1'542   1'405   3.68\n" +
+        "XAG  14.37  13.09  9.685  107.3   3'337   3.337   11.5   1'542   1'405   3.68\n" +
         "                                  -----   -----  -----  ------  ------  -----\n" +
         "                                  3'428   3.428  100.0  13'451  12'255  32.02\n")
     assertEquals(
@@ -774,7 +838,7 @@ def runTests():
         "XBT  418.9  381.7  282.3  13.30                   41.4   5'572   5'076  13.30\n" +
         "GBP  1.484  1.352  1.000  2'168                   23.9   3'217   2'931   7.59\n" +
         "XAU  1'076  980.4  725.3  2.900      90   0.090   23.2   3'121   2'843   7.45\n" +
-        "XAG  14.37  13.09   9.68  107.3   3'337   3.337   11.5   1'542   1'405   3.68\n" +
+        "XAG  14.37  13.09  9.685  107.3   3'337   3.337   11.5   1'542   1'405   3.68\n" +
         "                                  -----   -----  -----  ------  ------  -----\n" +
         "                                  3'428   3.428  100.0  13'451  12'255  32.02\n")
 

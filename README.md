@@ -7,28 +7,28 @@ Simply edit the lines at the beginning of the script with the value of your asse
 An example of the output produced:
 
 ```
-2016-01-02 14:26:47 - 1048 B sent / 3960 B received
-XAU/XAG=77.01  XBT/XAU=0.409  XPT/USD=891.7  XPD/USD=560.8  EUR/USD=1.086  USD/CNY=6.512
-GBP/EUR=1.360  GBP/USD=1.478  USD/JPY=120.6  USD/SEK=8.460
-USDX=98.68  USTNO13W=0.150  USTNO5Y=1.760  USTNO10Y=2.270  USTNO30Y=3.010  GBTC=63.00
-NYXBT=431.4  VIX=18.21  S&P1200=1'835  S&P500=2'044  NASDAQ=5'007  HSI=21'914
-Nikkei225=19'034  ESTX50EUR=3'268  DAX=10'743  FTSE100=6'242  CAC40=4'637  MIB=21'418
-ATHEX=183.3  AAPL=105.3  GOOG=758.9  MSFT=55.48  AMZN=675.9  FB=104.7
-FCAU=13.99  Miners=45.30  SP-CI=311.7  GS-CI=317.2  Oil=37.07  Gas=2.350
-Gold=1'060  Silver=13.80  Platinum=890.7  Palladium=549.7  Aluminum=1'642  Copper=2.129
-Corn=358.2  Oats=217.0  Rice=11.84  SoyM=265.7  SoyO=30.79  Soy=864.2
-L.Cattle=136.2  F.Cattle=163.3  Hogs=59.88  Cotton=63.28  Coffee=126.7  Cocoa=3'211
-Lumber=257.9  OJ=145.0  Sugar=15.24
+2016-02-01 21:04:30 - 1112 B sent / 4020 B received
+XAU/XAG=78.76  XBT/XAU=0.328  XPT/USD=868.8  XPD/USD=501.6  EUR/USD=1.089  USD/CNY=6.582
+GBP/EUR=1.326  GBP/USD=1.444  USD/JPY=121.0  USD/SEK=8.529
+USDX=98.99  USTNO13W=0.300  USTNO5Y=1.380  USTNO10Y=1.970  USTNO30Y=2.780  GBTC=42.99
+NYXBT=374.8  VIX=19.75  S&P1200=1'732  S&P500=1'939  NASDAQ=4'620  HSI=19'596
+Nikkei225=17'865  ESTX50EUR=3'021  DAX=9'758  FTSE100=6'060  CAC40=4'392  MIB=18'486
+ATHEX=155.0  AAPL=96.51  GOOG=751.0  MSFT=54.84  AMZN=573.4  FB=115.0
+FCAU=7.030  Miners=47.37  SP-CI=292.9  S&PFut=1'934  GS-CI=301.0  Oil=31.49
+Gas=2.142  Gold=1'130  Silver=14.36  Platinum=872.5  Palladium=505.0  Aluminum=1'640
+Copper=2.060  Corn=371.0  Oats=196.8  Rice=11.02  SoyM=269.7  SoyO=30.80
+Soy=878.8  L.Cattle=134.6  F.Cattle=158.2  Hogs=70.58  Cotton=61.79  Coffee=117.8
+Cocoa=2'852  Lumber=241.3  OJ=134.0  Sugar=12.83
 
 SYM  PRICE  PRICE  PRICE    QTY  WEIGHT  VALUE  VALUE  VALUE  VALUE  VALUE  VALUE
        USD    EUR    GBP              g      %    USD    EUR    GBP    XBT    XAU
 
-XAU  1'061  976.8  718.0  1.997      62   66.2  2'118  1'950  1'434  4.884  1.997
-XAG  13.78  12.68  9.323  36.37   1'131   15.7    501    461    339  1.156  0.473
-XBT  433.6  399.3  293.5  1.000           13.5    434    399    293  1.000  0.409
-GBP  1.478  1.360  1.000  100.0            4.6    148    136    100  0.340  0.140
+XAU  1'129  1'036  781.6  1.997      62   68.5  2'253  2'069  1'561  6.091  1.997
+XAG  14.33  13.16  9.924  36.37   1'131   15.8    521    478    361  1.407  0.462
+XBT  369.9  339.7  256.2  1.000           11.2    370    340    256  1.000  0.328
+GBP  1.444  1.326  1.000  100.0            4.4    144    133    100  0.390  0.130
                                   -----  -----  -----  -----  -----  -----  -----
-                                  1'193  100.0  3'200  2'947  2'166  7.381  3.018
+                                  1'193  100.0  3'289  3'020  2'278  8.888  2.916
 ```
 
 Various options to change the format of the output can be set by editing a few variables at the beginning of the script.  
