@@ -59,7 +59,7 @@ PRICE_CURS = ('USD', 'EUR', 'GBP', )
 
 # Which currencies to use to compute the total value of the portfolio.
 # '%' will print the percentages of the assets computed using the first currency in the list.
-TOTAL_CURS = ('%', 'USD', 'EUR', 'GBP', 'XBT', 'XAU', )
+VALUE_CURS = ('%', 'USD', 'EUR', 'GBP', 'XBT', 'XAU', )
 
 # Whether to display the currencies from highest to lowest of their value in the portfolio.
 DISPLAY_HIGHEST_TO_LOWEST = True
@@ -175,6 +175,15 @@ FUTURES = OrderedDict((
 
 ######################## END OF USER EDITABLE VARIABLES ########################
 
+# All user variables can be redefined in a file called 'finarm-data.py' in the
+# user home folder.
+import os
+try:
+    with open(os.path.join(os.path.expanduser('~'), 'finarm-data.py')) as f:
+        exec(f.read())
+except OSError:
+    pass
+
 # Symbols that represent metals.
 METALS = frozenset(('XAG', 'XAU', 'XPD', 'XPT'))
 
@@ -279,9 +288,9 @@ def makeYahooSymbolRatio(sym1, sym2, aliases):
     return aliases.get(sym1, sym1) + aliases.get(sym2, sym2) + '=X'
 
 # Returns a map of Yahoo symbols to their current prices.
-def getPrices(portfolio, priceCurs, totalCurs, ratios, quotes, aliases):
+def getPrices(portfolio, priceCurs, valueCurs, ratios, quotes, aliases):
     ratiosNeeded = frozenset(itertools.product(portfolio.keys(),
-                                               priceCurs + totalCurs)) \
+                                               priceCurs + valueCurs)) \
                    | frozenset(ratios)
     prices = getYahooQuotes(tuple(ratio for ratio in ratiosNeeded
                                   if ratio[0] != ratio[1]),
@@ -396,7 +405,7 @@ def formatCols(portfolio, symbolsToPrice, prefs):
             (prefs.price_label,    prefs.price_curs,   getPrice),
             (prefs.quantity_label, None,               getQty),
             (prefs.weight_label,   prefs.weight_units, getWgt),
-            (prefs.value_label,    prefs.total_curs,   getValue))
+            (prefs.value_label,    prefs.value_curs,   getValue))
 
     vcols = OrderedDict((col[0], computeColumn(symbols, col[2], col[1]))
                         for col in cols)
@@ -448,7 +457,7 @@ from collections import namedtuple
 from datetime import datetime
 
 Prefs = namedtuple('Prefs',
-                   ('weight_units', 'price_curs', 'total_curs', 'columns_with_total',
+                   ('weight_units', 'price_curs', 'value_curs', 'columns_with_total',
                     'display_highest_to_lowest', 'signif_digits', 'fract_separator',
                     'thousand_separator', 'columns_gap', 'max_per_line',
                     'symbol_label', 'quantity_label', 'price_label',
@@ -478,7 +487,7 @@ def makeNextFuturesQuotes(futures):
     return makeFuturesQuotes(futures, now.year, now.month)
 
 def main():
-    prefs = Prefs(WEIGHT_UNITS, PRICE_CURS, TOTAL_CURS, COLUMNS_WITH_TOTAL, DISPLAY_HIGHEST_TO_LOWEST,
+    prefs = Prefs(WEIGHT_UNITS, PRICE_CURS, VALUE_CURS, COLUMNS_WITH_TOTAL, DISPLAY_HIGHEST_TO_LOWEST,
                   SIGNIF_DIGITS, FRACT_SEPARATOR, THOUSAND_SEPARATOR, COLUMNS_GAP,
                   MAX_PER_LINE, SYMBOL_LABEL, QUANTITY_LABEL, PRICE_LABEL,
                   VALUE_LABEL, WEIGHT_LABEL, ALIASES, PRICE_WEIGHT_UNIT, LINE_CHAR, TRANS, METALS)
@@ -489,14 +498,14 @@ def main():
         portfolio = PORTFOLIO
     if portfolio:
         price_curs = prefs.price_curs
-        total_curs = prefs.total_curs
+        value_curs = prefs.value_curs
     else:
         price_curs = ()
-        total_curs = ()
+        value_curs = ()
     quotes = OrderedDict(QUOTES)
     quotes.update(makeNextFuturesQuotes(FUTURES))
 
-    symbolsToPrice = getPrices(portfolio, price_curs, total_curs, RATIOS, quotes, prefs.aliases)
+    symbolsToPrice = getPrices(portfolio, price_curs, value_curs, RATIOS, quotes, prefs.aliases)
     print(formatAll(symbolsToPrice, portfolio, RATIOS, quotes, prefs), end='')
 
 #################################### TESTS #####################################
@@ -511,7 +520,7 @@ def runTests():
     value_label = 'VALUE'
     tprefs = Prefs(weight_units = ('g', 'kg'),
                    price_curs = ('USD', 'EUR', 'GBP'),
-                   total_curs = ('%', 'USD', 'EUR', 'XBT'),
+                   value_curs = ('%', 'USD', 'EUR', 'XBT'),
                    columns_with_total = (weight_label, value_label),
                    display_highest_to_lowest = True,
                    signif_digits = 4,
