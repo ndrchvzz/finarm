@@ -233,12 +233,18 @@ def convertWeight(val, fromName, toName):
 
 # The only function that exchanges data with the net.
 def retrieveData(url):
-    print(str(len(url)), end=' B sent', flush=True)
-    response = urlopen(Request(url,
-                               headers = {'User-Agent': 'https://github.com/andrea-chiavazza/finarm'}))
-    data = str(response.read(), encoding = 'utf-8')
-    print(' / ' + str(len(data)) + ' B received')
-    return data
+    maxtries = 5
+    for i in range(1, maxtries):
+        try:
+            print(str(len(url)), end=' B sent', flush=True)
+            response = urlopen(Request(url,
+                                       headers = {'User-Agent': 'https://github.com/andrea-chiavazza/finarm'}))
+            data = str(response.read(), encoding = 'utf-8')
+            print(' / ' + str(len(data)) + ' B received')
+            return data
+        except Exception as e:
+            print('\n' + str(e) + ' - try(' + str(i) + '/' + str(maxtries) + ')')
+            time.sleep(2)
 
 # Returns the amount of symbol in the portfolio, to the given unit if it's a metal.
 def getPortfolioQuantity(portfolio, symbol, toUnit, metals):
@@ -452,7 +458,7 @@ def formatAll(symbolsToPrice, portfolio, ratios, quotes, prefs):
     portfolioStr = formatPortfolio(portfolio, symbolsToPrice, prefs)
     return '\n'.join(filter(len, (pricesStr, portfolioStr)))
 
-import sys
+import sys, time
 from collections import namedtuple
 from datetime import datetime
 
