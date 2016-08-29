@@ -202,7 +202,7 @@ TRANS = str.maketrans(dict((() if FRACT_SEPARATOR    == '.'
 
 ################################################################################
 
-import json, itertools
+import json, itertools, time
 from decimal import Decimal as D
 from fractions import Fraction as F
 from urllib.request import Request, urlopen
@@ -458,7 +458,7 @@ def formatAll(symbolsToPrice, portfolio, ratios, quotes, prefs):
     portfolioStr = formatPortfolio(portfolio, symbolsToPrice, prefs)
     return '\n'.join(filter(len, (pricesStr, portfolioStr)))
 
-import sys, time
+import sys
 from collections import namedtuple
 from datetime import datetime
 
@@ -500,8 +500,13 @@ def main():
     print(datetime.now().replace(microsecond = 0).isoformat(' '), end=' - ', flush=True)
     if '-q' in sys.argv:
         portfolio = {}
+        ratios = tuple(sorted((a, b) for a in PORTFOLIO
+                                     for b in filter(lambda c : c != '%', prefs.value_curs)
+                                     if a != b and (a, b) not in RATIOS)) + \
+                 RATIOS
     else:
         portfolio = PORTFOLIO
+        ratios = RATIOS
     if portfolio:
         price_curs = prefs.price_curs
         value_curs = prefs.value_curs
@@ -511,8 +516,15 @@ def main():
     quotes = OrderedDict(QUOTES)
     quotes.update(makeNextFuturesQuotes(FUTURES))
 
-    symbolsToPrice = getPrices(portfolio, price_curs, value_curs, RATIOS, quotes, prefs.aliases)
-    print(formatAll(symbolsToPrice, portfolio, RATIOS, quotes, prefs), end='')
+    symbolsToPrice = getPrices(portfolio, price_curs, value_curs, ratios, quotes, prefs.aliases)
+    fratios = ()
+    for (a, b) in ratios:
+        if (b, a) not in ratios or \
+            symbolsToPrice[makeYahooSymbolRatio(a, b, prefs.aliases)] > \
+            symbolsToPrice[makeYahooSymbolRatio(b, a, prefs.aliases)]:
+                fratios = fratios + ((a, b),)
+
+    print(formatAll(symbolsToPrice, portfolio, fratios, quotes, prefs), end='')
 
 #################################### TESTS #####################################
 
