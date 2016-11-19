@@ -482,6 +482,7 @@ def makeFuture(prefix, suffix, y, m, months):
         m = futMonths[0]
     else:
         m = months[0]
+        y += 1
     return prefix + m + str(y % 100) + suffix
 
 def makeFuturesQuotes(futures, y, m):
@@ -605,8 +606,8 @@ def runTests():
     assertEquals(makeFuture('C', '.CBT', 2016, 9, 'HKNUZ'), 'CZ16.CBT')
     assertEquals(makeFuture('C', '.CBT', 2016, 10, 'HKNUZ'), 'CZ16.CBT')
     assertEquals(makeFuture('C', '.CBT', 2016, 11, 'HKNUZ'), 'CZ16.CBT')
-    assertEquals(makeFuture('C', '.CBT', 2016, 11, 'HKNU'), 'CH16.CBT')
-    assertEquals(makeFuture('C', '.CBT', 2016, 10, 'HKNU'), 'CH16.CBT')
+    assertEquals(makeFuture('C', '.CBT', 2016, 11, 'HKNU'), 'CH17.CBT')
+    assertEquals(makeFuture('C', '.CBT', 2016, 10, 'HKNU'), 'CH17.CBT')
     assertEquals(makeFuture('C', '.CBT', 2016, 10, None), 'CX16.CBT')
     assertEquals(makeFuturesQuotes(OrderedDict(((('C', '.CBT', 'HKNU'), 'Corn'),
                                                 (('SM', '.CBT', 'HKNUZ'), 'SoyM'),
